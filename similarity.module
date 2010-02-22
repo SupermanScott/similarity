@@ -16,7 +16,7 @@
  * Implementation of hook_ctools_plugin_api().
  */
 function similarity_ctools_plugin_api($module, $api) {
-  if ($module == 'similarity' && $api == 'similarity_object') {
+  if ($module == 'similarity' && $api == 'similarity_objects') {
     return array('version' => 1);
   }
 }
@@ -24,7 +24,7 @@ function similarity_ctools_plugin_api($module, $api) {
 /**
  * Implementation of hook_similarity_objects_default().
  */
-function similarity_similarity_objects_default() {
+function similarity_similarity_objects_default($export) {
   $export = array();
   $test_object = new stdClass;
   $test_object->api_version = 1;
@@ -34,6 +34,7 @@ function similarity_similarity_objects_default() {
     'tokenizer' => 'similarity_taxonomy',
   );
 
+  $export['test'] = $test_object;
   return $export;
 }
 
@@ -109,7 +110,7 @@ function similarity_all_objects($load_disabled = FALSE) {
   $objects = array();
   if (function_exists('ctools_include')) {
     ctools_include('export');
-    $exported = ctools_export_load_object('similarity_object', 'all');
+    $exported = ctools_export_load_object('similarity_objects', 'all');
     foreach ($exported as $exported_similarity) {
       if (!empty($exported_similarity->machine_name)) {
         $objects[$exported_similarity->machine_name] = similarity_create($exported_similarity);

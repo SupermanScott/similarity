@@ -42,7 +42,7 @@ class Similarity {
    * Set the options by respecting the defaults.
    */
   protected function setOptions($options) {
-    $defaults = $this->options_defaults;
+    $defaults = $this->optionsDefaults();
     $option_keys = array_keys($defaults);
 
     foreach ($option_keys as $key) {
@@ -137,7 +137,7 @@ class Similarity {
    *  The similarity score.
    */
   protected function saveSimilarity($object_id1, $object_id2, $similarity) {
-    drupal_set_message($object_id1 ' -> ' . $object_id2 . ' = ' . $similarity);
+    drupal_set_message($object_id1 . ' -> ' . $object_id2 . ' = ' . $similarity);
   }
 
   /**
