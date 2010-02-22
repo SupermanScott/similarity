@@ -50,7 +50,6 @@ class Similarity {
         $options[$key] = $defaults[$key];
       }
     }
-
     $this->options = $options;
   }
 
@@ -93,7 +92,7 @@ class Similarity {
   protected function tokenize($object_id) {
     $tokens = array();
 
-    $tokens = similarity_execute_library('tokenizer', $tokenizer, array($object_id));
+    $tokens = similarity_execute_library('tokenizer', $this->options['tokenizer'], array($object_id));
 
     foreach ($this->options['transformers'] as $transformer_name) {
       $tokens = similarity_execute_library('transformer', $transformer_name, array($tokens));
@@ -112,12 +111,11 @@ class Similarity {
    */
   public function calculate($object_id, $object_set) {
     $base_tokens = $this->tokenize($object_id);
-    $algorithm = similarity_load_algorithm($this->config['algorithm']);
 
     foreach ($object_set as $other_id) {
       if ($other_id != $object_id) {
         $other_tokens = $this->tokenize($other_id);
-        $similarity = similarity_execute_library('algorithm', $this->config['algorithm'], array($base_tokens, $other_tokens));
+        $similarity = similarity_execute_library('algorithm', $this->options['algorithm'], array($base_tokens, $other_tokens));
 
         $this->saveSimilarity($object_id, $other_id, $similarity);
       }
