@@ -135,10 +135,24 @@ class Similarity {
    *  The similarity score.
    */
   protected function saveSimilarity($object_id1, $object_id2, $similarity) {
-    drupal_set_message($object_id1 . ' -> ' . $object_id2 . ' = ' . $similarity);
     if (!db_table_exists('similarity_' . $this->machine_name)) {
       $ret = array();
       db_create_table($ret, 'similarity_' . $this->machine_name, $this->schema());
+    }
+
+    // Store nid1 as the smallest id.
+    if ($object_id1 < $object_id2) {
+      $nid1 = $object_id1;
+      $nid2 = $object_id2;
+    }
+    else {
+      $nid1 = $object_id2;
+      $nid2 = $object_id1;
+    }
+
+    db_query('UPDATE {similarity_' . $this->machine_name . '} SET score = %f, created = %d WHERE nid1 = %d AND nid2 = %d', $similarity, time(), $nid1, $nid2);
+    if (!db_affected_rows()) {
+      db_query('INSERT INTO {similarity_' . $this->machine_name . '} (score, created, nid1, nid2) VALUE (%f, %d, %d)', $similarity, time(), $nid1, $nid2);
     }
   }
 
