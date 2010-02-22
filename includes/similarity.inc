@@ -172,7 +172,6 @@ class Similarity {
       'indexes' => array(
         'id_1' => array('nid1'),
         'id_2' => array('nid2'),
-        'score' => array('score'),
       ),
     );
     
