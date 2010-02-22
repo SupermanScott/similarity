@@ -1,0 +1,1 @@
+This is a rewrite of the similarity module. It uses CTools and DrupalQueue to create configurable and hopefully scalable similarity calculations.
