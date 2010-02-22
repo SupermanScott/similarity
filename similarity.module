@@ -13,6 +13,31 @@
  */
 
 /**
+ * Implementation of hook_ctools_plugin_api().
+ */
+function similarity_ctools_plugin_api($module, $api) {
+  if ($module == 'similarity' && $api == 'similarity_object') {
+    return array('version' => 1);
+  }
+}
+
+/**
+ * Implementation of hook_similarity_objects_default().
+ */
+function similarity_similarity_objects_default() {
+  $export = array();
+  $test_object = new stdClass;
+  $test_object->api_version = 1;
+  $test_object->machine_name = 'test';
+  $test_object->options = array(
+    'title' => 'Test Object',
+    'tokenizer' => 'similarity_taxonomy',
+  );
+
+  return $export;
+}
+
+/**
  * Implementation of hook_similarity_library().
  */
 function similarity_similarity_library() {
@@ -105,8 +130,8 @@ function similarity_all_objects($load_disabled = FALSE) {
  *  The fully loaded and instatiated similarity object.
  */
 function similarity_create($ctools_object) {
-
-  return $ctools_object;
+  ctools_include('similarity', 'similarity');
+  return new Similarity($ctools_object->machine_name, $ctools_object->options);
 }
 
 // util functions
