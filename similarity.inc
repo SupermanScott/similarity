@@ -87,16 +87,10 @@ abstract class Similarity {
   protected function tokenize($object_id) {
     $tokens = array();
 
-    $tokenizer = similarity_load_tokenizer($this->options['tokenizer']);
-    if ($tokenizer != SIMILARITY_PLUGIN_BROKEN) {
-      $tokens = $tokenizer->getTokens($object_id);
+    $tokens = similarity_execute_library('tokenizer', $tokenizer, array($object_id));
 
-      foreach ($this->options['transformers'] as $transformer_name) {
-        $transformer = similarity_load_transformer($transformer_name);
-        if ($transformer != SIMILARITY_PLUGIN_BROKEN) {
-          $tokens = $transformer->transformTokens($tokens);
-        }
-      }
+    foreach ($this->options['transformers'] as $transformer_name) {
+      $tokens = similarity_execute_library('transformer', $transformer_name, array($tokens));
     }
     return $tokens;
   }
@@ -117,10 +111,29 @@ abstract class Similarity {
     foreach ($object_set as $other_id) {
       if ($other_id != $object_id) {
         $other_tokens = $this->tokenize($other_id);
-        $algorithm->saveSimilarity($this->machine_name, $object_id, $other_id, $base_tokens, $other_tokens);
+        $similarity = similarity_execute_library('algorithm', $this->config['algorithm'], array($base_tokens, $other_tokens));
+
+        $this->saveSimilarity($object_id, $other_id, $similarity);
       }
     }
   }
+
+  /**
+   * Save the similarity away.
+   *
+   * @param $object_id1
+   *  The id of the first object.
+   *
+   * @param $object_id2
+   *  The id fo the second object.
+   *
+   * @param $similarity
+   *  The similarity score.
+   */
+  protected function saveSimilarity($object_id1, $object_id2, $similarity) {
+    drupal_set_message($object_id1 ' -> ' . $object_id2 . ' = ' . $similarity);
+  }
+
 
   abstract protected function schema();
 

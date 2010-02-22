@@ -12,8 +12,6 @@
  * Oh ya, and it respects node_access
  */
 
-define('SIMILARITY_PLUGIN_BROKEN', 0);
-
 /**
  * Implementation fo hook_menu().
  */
@@ -126,4 +124,32 @@ function similarity_export($machine_name, $indent = '') {
   if (isset($result[$machine_name])) {
     return ctools_export_object('similarity_object', $result[$machine_name], $indent);
   }
+}
+
+/**
+ * Load a library function and return its result.
+ *
+ * @param $type
+ *  library function type.
+ *
+ * @param $name
+ *  Name of the function.
+ *
+ * @param $params
+ *  The parameters to pass into the function.
+ */
+function similarity_execute_library($type, $name, $params = array()) {
+  static $libaries = NULL;
+  static $included_files = array();
+  if (!isset($libraries)) {
+    $libraries = module_invoke_all('similarity_library');
+    drupal_alter('similarity_library', $libraries);
+  }
+
+  if (isset($libraries[$type][$name])) {
+    // @TODO: handle external files.
+    return call_user_func_array($libraries[$library_key], $params);
+  }
+
+  return FALSE;
 }
