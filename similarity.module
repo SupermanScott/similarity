@@ -51,7 +51,7 @@ function similarity_similarity_library() {
 }
 
 /**
- * Implementation fo hook_menu().
+ * Implementation of hook_menu().
  */
 function similarity_menu() {
   return array(
