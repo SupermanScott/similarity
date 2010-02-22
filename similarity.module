@@ -1,0 +1,129 @@
+<?php
+// $Id: similarity.module,v 1.1.2.12 2009/06/03 05:39:36 scottreynolds Exp $
+
+/**
+ * @file similarity.module
+ * lovingly crafted by Scott Reynolds
+ *
+ * Provides a generic scalable methods to draw similarities between node objects.
+ * It exposes its data to Views so you may do with it as you will. It also provides
+ * configurable blocks for each similarity on the site.
+ *
+ * Oh ya, and it respects node_access
+ */
+
+define('SIMILARITY_PLUGIN_BROKEN', 0);
+
+/**
+ * Implementation fo hook_menu().
+ */
+function similarity_menu() {
+  return array(
+    'admin/build/similarity' => array(
+      'title' => 'Similarity Objects',
+      'page callback' => 'similarity_objects_overview',
+      'file' => 'similarity.pages',
+      'access arguments' => array('administer similarity'),
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_perm().
+ */
+function similarity_perm() {
+  return array('administer similarity');
+}
+
+/**
+ * Load all similarity objects.
+ *
+ * @param $load_disabled = FALSE
+ *  Whether or not to load disabled similarity objects
+ *
+ * @return
+ *  An array of all similarity objects
+ */
+function similarity_all_objects($load_disabled = FALSE) {
+  $objects = array();
+  if (function_exists('ctools_include')) {
+    ctools_include('export');
+    $exported = ctools_export_load_object('similarity_object', 'all');
+    foreach ($exported as $exported_similarity) {
+      if (!empty($exported_similarity->machine_name) && ($load_disabled || empty($exported_similarity->disabled))) {
+        $objects[$exported_similarity->machine_name] = similarity_create($exported_similarity);
+      }
+    }
+  }
+
+  return $objects;
+}
+
+/**
+ * Instantiate a given similarity object in memory.
+ *
+ * @param stdClass $ctools_object
+ *  The ctools object from ctools_export_load_object.
+ *
+ * @return similarity
+ *  The fully loaded and instatiated similarity object.
+ */
+function similarity_create($ctools_object) {
+
+  return $ctools_object;
+}
+
+// util functions
+/**
+ * calculates teh cosine between objects a and b
+ *
+ * @param $a
+ * array of revelancy scores keyed by word
+ * ie 'wizard' => 7.33333
+ *
+ * @param $b
+ * array of revelancy scores keyed by word
+ * ie 'wizard' => 7.33333
+ * 
+ * @see get_words
+ */
+function similarity_cosine($a, $b) {
+  $dot_product = 0;
+  $a_total = 0;
+  $b_total = 0;
+  
+  $total_words = array_unique(array_merge(array_keys($a), array_keys($b)));
+
+  // only care about the key $word
+  foreach($total_words as $word) {
+    if (isset($a[$word]) && isset($b[$word])) {
+      $dot_product += $a[$word] * $b[$word];
+    }
+    
+    if (isset($a[$word])) {
+      $a_total += pow($a[$word], 2);
+    }
+    
+    if (isset($b[$word])) {
+      $b_total += pow($b[$word], 2);
+    }
+  }
+  
+  // if nothing worked
+  if ($a_total == 0 || $b_total == 0 ) {
+    return 0;
+  }
+  
+  return ($dot_product / sqrt($a_total * $b_total));
+}
+
+/**
+ * Export a Similarity configuration to code.
+ */
+function similarity_export($machine_name, $indent = '') {
+  ctools_include('export');
+  $result = ctools_export_load_object('similarity_object', 'names', array('machine_name' => $machine_name));
+  if (isset($result[$machine_name])) {
+    return ctools_export_object('similarity_object', $result[$machine_name], $indent);
+  }
+}

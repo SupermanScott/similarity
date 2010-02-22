@@ -1,0 +1,65 @@
+<?php
+// $Id: similarity.install,v 1.1.2.4 2009/04/24 04:39:06 scottreynolds Exp $
+
+/**
+ * @file similarity.install
+ * lovingly crafted by Scott Reynolds
+ *
+ * Installs the similarity_objects table. For each similarity object, they will
+ * create their own tables
+ */
+
+function similarity_schema() {
+  $schema['similarity_objects'] = array(
+    'description' => 'Storage for the similarity objects',
+    'export' => array(
+      'key' => 'machine_name',
+      'identifier' => 'similarity_object',
+      'default hook' => 'similarity_objects_default',
+      'api' => array(
+        'owner' => 'similarity',
+        'api' => 'similarity_objects',
+        'minimum_version' => 1,
+        'current_version' => 1,
+      ),
+    ),
+    'fields' => array(
+      'machine_name' => array(
+        'description' => 'Machine readable unique name',
+        'type' => 'varchar',
+        'length' => 128,
+        'not null' => TRUE
+      ),
+      'config' => array(
+        'descrpition' => 'Configuration options for the similarity object',
+        'type' => 'text',
+        'serialize' => TRUE,
+      ),
+    ),
+    'primary key' => array('machine_name'),
+  );
+  
+  return $schema;
+}
+
+function similarity_install() {
+  drupal_install_schema('similarity');
+}
+
+function similarity_uninstall() {
+  drupal_uninstall_schema('similarity');
+}
+
+/**
+ * Implementation of hook_requirements(.)
+ */
+function similarity_requirements() {
+  $requirements = array();
+  $t = get_t();
+  if (version_compare(phpversion(), '5.2') < 0) {
+    $requirements['php']['description'] = $t('Your PHP installation is too old. Similarity requires at least PHP %version.', array('%version' => '5'));
+    $requirements['php']['severity'] = REQUIREMENT_ERROR;
+  }
+  
+  return $requirements;
+}
