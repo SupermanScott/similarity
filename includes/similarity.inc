@@ -136,6 +136,10 @@ class Similarity {
    */
   protected function saveSimilarity($object_id1, $object_id2, $similarity) {
     drupal_set_message($object_id1 . ' -> ' . $object_id2 . ' = ' . $similarity);
+    if (!db_table_exists('similarity_' . $this->machine_name)) {
+      $ret = array();
+      db_create_table($ret, 'similarity_' . $this->machine_name, $this->schema());
+    }
   }
 
   /**
