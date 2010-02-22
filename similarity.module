@@ -63,12 +63,13 @@ function similarity_similarity_library() {
     ),
   );
 
-  foreach (array('tokenizer', 'transfomer', 'algorithm') as $type) {
+  foreach (array('tokenizer', 'transformer', 'algorithm') as $type) {
     foreach (array_keys($library[$type]) as $library_callbacks) {
       $library[$type][$library_callbacks] += array(
         'path' => 'includes',
         'file' => 'similarity_library',
         'module' => 'similarity',
+        'base' => array('node'),
       );
     }
   }
@@ -136,49 +137,6 @@ function similarity_create($ctools_object) {
 }
 
 // util functions
-/**
- * calculates teh cosine between objects a and b
- *
- * @param $a
- * array of revelancy scores keyed by word
- * ie 'wizard' => 7.33333
- *
- * @param $b
- * array of revelancy scores keyed by word
- * ie 'wizard' => 7.33333
- * 
- * @see get_words
- */
-function similarity_cosine($a, $b) {
-  $dot_product = 0;
-  $a_total = 0;
-  $b_total = 0;
-  
-  $total_words = array_unique(array_merge(array_keys($a), array_keys($b)));
-
-  // only care about the key $word
-  foreach($total_words as $word) {
-    if (isset($a[$word]) && isset($b[$word])) {
-      $dot_product += $a[$word] * $b[$word];
-    }
-    
-    if (isset($a[$word])) {
-      $a_total += pow($a[$word], 2);
-    }
-    
-    if (isset($b[$word])) {
-      $b_total += pow($b[$word], 2);
-    }
-  }
-  
-  // if nothing worked
-  if ($a_total == 0 || $b_total == 0 ) {
-    return 0;
-  }
-  
-  return ($dot_product / sqrt($a_total * $b_total));
-}
-
 /**
  * Export a Similarity configuration to code.
  */
