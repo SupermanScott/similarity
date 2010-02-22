@@ -25,7 +25,7 @@ class Similarity {
       'title' => '',
       'min_sim' => 50,
       'time_limit' => 15,
-      'base' => '',
+      'base' => 'node',
       'conditions' => array(),
       'tokenizer' => '',
       'transformers' => array(),
