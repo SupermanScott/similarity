@@ -10,9 +10,10 @@
  */
 
 /**
- * Abstract class for similarity objects.
+ * A Similarity object that consists of conditions, tokenizer, transformers and
+ * an algorithm.
  */
-abstract class Similarity {
+class Similarity {
   // The unique name of the object.
   public $machine_name;
 
@@ -28,7 +29,7 @@ abstract class Similarity {
       'conditions' => array(),
       'tokenizer' => '',
       'transformers' => array(),
-      'algorithm' => 'SimilarityCosine',
+      'algorithm' => 'similarity_cosine',
     );
   }
 
@@ -132,27 +133,6 @@ abstract class Similarity {
    */
   protected function saveSimilarity($object_id1, $object_id2, $similarity) {
     drupal_set_message($object_id1 ' -> ' . $object_id2 . ' = ' . $similarity);
-  }
-
-
-  abstract protected function schema();
-
-  abstract protected function views_data();
-}
-
-/**
- * Similarity class for node entities.
- */
-class SimilarityNode extends Similarity {
-
-  /**
-   * Override optionsDefaults
-   */
-  protected function optionsDefaults() {
-    $options = parent::optionsDefaults();
-    // The base to filter all the plugins too.
-    $options['base'] = 'node';
-    return $options;
   }
 
   /**
