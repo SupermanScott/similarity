@@ -86,7 +86,7 @@ function similarity_all_objects($load_disabled = FALSE) {
     ctools_include('export');
     $exported = ctools_export_load_object('similarity_object', 'all');
     foreach ($exported as $exported_similarity) {
-      if (!empty($exported_similarity->machine_name) && ($load_disabled || empty($exported_similarity->disabled))) {
+      if (!empty($exported_similarity->machine_name)) {
         $objects[$exported_similarity->machine_name] = similarity_create($exported_similarity);
       }
     }
