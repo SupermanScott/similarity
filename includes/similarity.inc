@@ -18,7 +18,12 @@ class Similarity {
   public $machine_name;
 
   // The configuration options are stored in here.
-  protected $config = array();
+  protected $options = array();
+
+  public function __construct($name, $options) {
+    $this->machine_name = $name;
+    $this->setOptions($options);
+  }
 
   protected function optionsDefaults() {
     return array(

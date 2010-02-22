@@ -30,7 +30,7 @@ function similarity_schema() {
         'length' => 128,
         'not null' => TRUE
       ),
-      'config' => array(
+      'options' => array(
         'descrpition' => 'Configuration options for the similarity object',
         'type' => 'text',
         'serialize' => TRUE,
