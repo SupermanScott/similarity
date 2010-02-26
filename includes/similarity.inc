@@ -27,14 +27,14 @@ class Similarity {
 
   protected function optionsDefaults() {
     return array(
-      'title' => '',
-      'min_sim' => 50,
-      'time_limit' => 15,
-      'base' => 'node',
-      'conditions' => array(),
-      'tokenizer' => '',
-      'transformers' => array(),
-      'algorithm' => 'similarity_cosine',
+      'title' => array('#default_value' => ''),
+      'min_sim' => array('#default_value' => 50),
+      'time_limit' => array('#default_value' => 15),
+      'base' => array('#default_value' => 'node'),
+      'conditions' => array('#has_children' => TRUE, '#default_value' => array()),
+      'tokenizer' => array('#default_value' => '', '#options' => array()),
+      'transformers' => array('#has_children' => TRUE, '#default_value' => array()),
+      'algorithm' => array('#default_value' => 'similarity_cosine', '#options' => array()),
     );
   }
 
@@ -43,13 +43,14 @@ class Similarity {
    */
   protected function setOptions($options) {
     $defaults = $this->optionsDefaults();
-    $option_keys = array_keys($defaults);
+    $option_keys = element_children($defaults);
 
     foreach ($option_keys as $key) {
       if (!isset($options[$key])) {
-        $options[$key] = $defaults[$key];
+        $options[$key] = $defaults[$key]['#default_value'];
       }
     }
+
     $this->options = $options;
   }
 
