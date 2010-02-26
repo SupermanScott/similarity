@@ -10,14 +10,16 @@
  * calculates teh cosine between objects a and b
  *
  * @param $a
- * array of revelancy scores keyed by word
- * ie 'wizard' => 7.33333
+ * array of revelancy scores keyed by word i.e 'wizard' => 7.33333.
  *
  * @param $b
- * array of revelancy scores keyed by word
- * ie 'wizard' => 7.33333
+ *   array of revelancy scores keyed by word i.e 'wizard' => 7.33333.
  * 
- * @see get_words
+ * @param $options
+ *  $options from our settings form.
+ *
+ * @return float
+ *  The similarity score in between 0 and 1
  */
 function similarity_cosine($a, $b, $options) {
   $dot_product = 0;
@@ -59,8 +61,12 @@ function similarity_cosine($a, $b, $options) {
  *  a tid => tf/idf array for all terms assigned to the node.
  */
 function similarity_taxonomy_tokens($nid, $options) {
-  // @TODO: need a way to restrict to vid.
-  $tids = db_query("SELECT tid FROM {term_node} WHERE nid = %d", $nid);
+  if ($options['vid'] == 0) {
+    $tids = db_query("SELECT tid FROM {term_node} WHERE nid = %d", $nid);
+  }
+  else {
+    $tids = db_query("SELECT tn.tid FROM {term_node} tn INNER JOIN {term_data} td ON td.tid = tn.tid AND td.vid = %d WHERE tn.tid = %d", $options['vid'], $nid);
+  }
   $tokens = array();
 
   while ($tid_object = db_fetch_object($tids)) {
