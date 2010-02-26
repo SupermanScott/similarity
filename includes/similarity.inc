@@ -32,9 +32,21 @@ class Similarity {
       'time_limit' => array('#default_value' => 15),
       'base' => array('#default_value' => 'node'),
       'conditions' => array('#has_children' => TRUE),
-      'tokenizer' => array('#default_value' => '', '#options' => array()),
+      'tokenizer' => array(
+        '#has_children' => TRUE,
+        'function' => array('#default_value' => ''),
+        'options' => array(
+          '#has_children' => TRUE,
+        ),
+      ),
       'transformers' => array('#has_children' => TRUE),
-      'algorithm' => array('#default_value' => 'similarity_cosine', '#options' => array()),
+      'algorithm' => array(
+        '#has_children' => TRUE,
+        'function' => array('#default_value' => 'similarity_cosine'),
+        'options' => array(
+          '#has_children' => TRUE,
+        ),
+      ),
     );
   }
 
@@ -110,7 +122,7 @@ class Similarity {
   protected function tokenize($object_id) {
     $tokens = array();
 
-    $tokens = similarity_execute_library('tokenizer', $this->options['tokenizer'], array($object_id));
+    $tokens = similarity_execute_library('tokenizer', $this->options['tokenizer']['function'], array($object_id, $this->options['tokenizer']['options']));
 
     foreach ($this->options['transformers'] as $transformer_name) {
       $tokens = similarity_execute_library('transformer', $transformer_name, array($tokens));
