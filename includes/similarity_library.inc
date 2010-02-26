@@ -19,7 +19,7 @@
  * 
  * @see get_words
  */
-function similarity_cosine($a, $b) {
+function similarity_cosine($a, $b, $options) {
   $dot_product = 0;
   $a_total = 0;
   $b_total = 0;
@@ -58,7 +58,7 @@ function similarity_cosine($a, $b) {
  * @return array
  *  a tid => tf/idf array for all terms assigned to the node.
  */
-function similarity_taxonomy_tokens($nid) {
+function similarity_taxonomy_tokens($nid, $options) {
   // @TODO: need a way to restrict to vid.
   $tids = db_query("SELECT tid FROM {term_node} WHERE nid = %d", $nid);
   $tokens = array();

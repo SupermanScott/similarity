@@ -34,7 +34,7 @@ class Similarity {
       'conditions' => array('#has_children' => TRUE),
       'tokenizer' => array(
         '#has_children' => TRUE,
-        'function' => array('#default_value' => ''),
+        'callback_id' => array('#default_value' => ''),
         'options' => array(
           '#has_children' => TRUE,
         ),
@@ -42,7 +42,7 @@ class Similarity {
       'transformers' => array('#has_children' => TRUE),
       'algorithm' => array(
         '#has_children' => TRUE,
-        'function' => array('#default_value' => 'similarity_cosine'),
+        'callback_id' => array('#default_value' => 'similarity_cosine'),
         'options' => array(
           '#has_children' => TRUE,
         ),
@@ -122,10 +122,10 @@ class Similarity {
   protected function tokenize($object_id) {
     $tokens = array();
 
-    $tokens = similarity_execute_library('tokenizer', $this->options['tokenizer']['function'], array($object_id, $this->options['tokenizer']['options']));
+    $tokens = similarity_execute_library('tokenizer', $this->options['tokenizer']['callback_id'], array($object_id, $this->options['tokenizer']['options']));
 
-    foreach ($this->options['transformers'] as $transformer_name) {
-      $tokens = similarity_execute_library('transformer', $transformer_name, array($tokens));
+    foreach ($this->options['transformers'] as $transformer_definition) {
+      $tokens = similarity_execute_library('transformer', $transformer_definition['callback_id'], array($tokens, $transformer_definition['options']));
     }
     return $tokens;
   }
@@ -145,7 +145,7 @@ class Similarity {
     foreach ($object_set as $other_id) {
       if ($other_id != $object_id) {
         $other_tokens = $this->tokenize($other_id);
-        $similarity = similarity_execute_library('algorithm', $this->options['algorithm'], array($base_tokens, $other_tokens));
+        $similarity = similarity_execute_library('algorithm', $this->options['algorithm']['callback_id'], array($base_tokens, $other_tokens, $this->options['algorithm']['options']));
 
         $this->saveSimilarity($object_id, $other_id, $similarity);
       }

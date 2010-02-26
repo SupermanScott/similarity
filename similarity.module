@@ -31,7 +31,12 @@ function similarity_similarity_objects_default($export_defintion) {
   $test_object->machine_name = 'test';
   $test_object->options = array(
     'title' => 'Test Object',
-    'tokenizer' => 'similarity_taxonomy',
+    'tokenizer' => array(
+      'callback_id' => 'similarity_taxonomy',
+      'options' => array(
+        'vid' => 0,
+      ),
+    ),
   );
 
   $export['test'] = $test_object;
