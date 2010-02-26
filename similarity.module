@@ -48,7 +48,7 @@ function similarity_similarity_objects_default($export_defintion) {
  */
 function similarity_similarity_library() {
   $library = array(
-    'conditions' => array(),
+    'condition' => array(),
     'tokenizer' => array(
       'similarity_search' => array(
         'title' => t('Search Index'),
