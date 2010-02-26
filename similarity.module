@@ -57,6 +57,9 @@ function similarity_similarity_library() {
       'similarity_taxonomy' => array(
         'title' => t('Taxonomy'),
         'function' => 'similarity_taxonomy_tokens',
+        'options' => array(
+          'vid' => array('#default_value' => 0),
+        ),
       ),
     ),
     'transformer' => array(),
