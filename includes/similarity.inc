@@ -31,9 +31,9 @@ class Similarity {
       'min_sim' => array('#default_value' => 50),
       'time_limit' => array('#default_value' => 15),
       'base' => array('#default_value' => 'node'),
-      'conditions' => array('#has_children' => TRUE, '#default_value' => array()),
+      'conditions' => array('#has_children' => TRUE),
       'tokenizer' => array('#default_value' => '', '#options' => array()),
-      'transformers' => array('#has_children' => TRUE, '#default_value' => array()),
+      'transformers' => array('#has_children' => TRUE),
       'algorithm' => array('#default_value' => 'similarity_cosine', '#options' => array()),
     );
   }
@@ -47,11 +47,28 @@ class Similarity {
 
     foreach ($option_keys as $key) {
       if (!isset($options[$key])) {
-        $options[$key] = $defaults[$key]['#default_value'];
+        $options[$key] = $this->setDefault($defaults[$key]);
       }
     }
-
     $this->options = $options;
+  }
+
+  /**
+   * Recursive function to find the default value.
+   *
+   * @param $option_default
+   *  The option default definition for this field.
+   *
+   * @return mixed
+   */
+  protected function setDefault($option_default) {
+    if (!empty($option_default['#has_children'])) {
+      $option_default['#default_value'] = array();
+      foreach (element_children($option_default) as $child) {
+        $option_default['#default_value'][$child] = $this->setDefault($option_default[$child]);
+      }
+    }
+    return $option_default['#default_value'];
   }
 
   /**
