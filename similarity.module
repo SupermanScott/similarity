@@ -37,6 +37,16 @@ function similarity_similarity_objects_default($export_defintion) {
         'vid' => 0,
       ),
     ),
+    'conditions' => array(
+      array(
+        'callback_id' => 'similarity_node_type',
+        'options' => array(
+          'types' => array(
+            'story',
+          ),
+        ),
+      ),
+    ),
   );
 
   $export['test'] = $test_object;
@@ -48,7 +58,15 @@ function similarity_similarity_objects_default($export_defintion) {
  */
 function similarity_similarity_library() {
   $library = array(
-    'condition' => array(),
+    'condition' => array(
+      'similarity_node_type' => array(
+        'title' => t('Node Type'),
+        'function' => 'similarity_condition_node_type',
+        'options' => array(
+          'types' => array(),
+        ),
+      ),
+    ),
     'tokenizer' => array(
       'similarity_search' => array(
         'title' => t('Search Index'),
@@ -71,7 +89,7 @@ function similarity_similarity_library() {
     ),
   );
 
-  foreach (array('tokenizer', 'transformer', 'algorithm') as $type) {
+  foreach (array('tokenizer', 'transformer', 'algorithm', 'condition') as $type) {
     foreach (array_keys($library[$type]) as $library_callbacks) {
       $library[$type][$library_callbacks] += array(
         'path' => 'includes',

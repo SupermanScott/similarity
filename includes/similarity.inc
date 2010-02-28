@@ -31,6 +31,7 @@ class Similarity {
       'min_sim' => array('#default_value' => 50),
       'time_limit' => array('#default_value' => 15),
       'base' => array('#default_value' => 'node'),
+      'base_field' => array('#default_value' => 'nid'),
       'conditions' => array('#default_value' => array()),
       'tokenizer' => array(
         'callback_id' => array('#default_value' => ''),
@@ -182,6 +183,41 @@ class Similarity {
       db_query('INSERT INTO {similarity_' . $this->machine_name . '} (score, created, nid1, nid2) VALUE (%f, %d, %d)', $similarity, time(), $nid1, $nid2);
     }
   }
+
+  /**
+   * Find all the candidate base_fields
+   *
+   * @return array
+   *  an array for $this->base_field ids.
+   */
+  public function findCandidates() {
+    $query = array(
+      'filters' => array(),
+      'arguments' => array(),
+      'joins' => array(),
+    );
+
+    foreach ($this->options['conditions'] as $condition_defintion) {
+      $query = similarity_execute_library('condition', $condition_defintion['callback_id'], array($query, $condition_defintion['options']));
+    }
+
+    // Build the query based on the $query array.
+    $query_string = "SELECT {" . $this->options['base'] . "}." . $this->options['base_field'] . " FROM {" . $this->options['base'] . "}";
+    if (!empty($query['joins'])) {
+      $query_string .= " " . implode(" ", $query['joins']);
+    }
+
+    if (!empty($query['filters'])) {
+      $query_string .= " WHERE " . implode(" AND ", $query['filters']);
+    }
+
+    $result = db_query($query_string, $query['arguments']);
+    $ids = array();
+    while ($row = db_fetch_object($result)) {
+      $ids[] = $row->{$this->options['base_field']};
+    }
+    return $ids;
+	}
 
   /**
    * Provide the schema definition for this object.

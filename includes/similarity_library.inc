@@ -73,6 +73,22 @@ function similarity_taxonomy_tokens($nid, $options) {
     // @TODO: calculate tf/idf.
     $tokens[$tid_object->tid] = 1;
   }
-
   return $tokens;
+}
+
+/**
+ * Node Type condition
+ *
+ * @param array $query
+ *  Structure array representing the query.
+ *
+ * @param $options
+ *  An array of option values.
+ */
+function similarity_condition_node_type($query, $options) {
+  if (!empty($options['types'])) {
+    $query['filters']['type'] = 'node.type IN(' . db_placeholders($options['types'], 'varchar') . ')';
+    $query['arguments'] += $options['types'];
+  }
+  return $query;
 }
