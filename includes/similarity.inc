@@ -31,20 +31,16 @@ class Similarity {
       'min_sim' => array('#default_value' => 50),
       'time_limit' => array('#default_value' => 15),
       'base' => array('#default_value' => 'node'),
-      'conditions' => array('#has_children' => TRUE),
+      'conditions' => array('#default_value' => array()),
       'tokenizer' => array(
-        '#has_children' => TRUE,
         'callback_id' => array('#default_value' => ''),
-        'options' => array(
-          '#has_children' => TRUE,
-        ),
+        'options' => array('#default_value' => array()),
       ),
-      'transformers' => array('#has_children' => TRUE),
+      'transformers' => array('#default_value' => array()),
       'algorithm' => array(
-        '#has_children' => TRUE,
         'callback_id' => array('#default_value' => 'similarity_cosine'),
         'options' => array(
-          '#has_children' => TRUE,
+          '#default_value' => array(),
         ),
       ),
     );
@@ -74,9 +70,10 @@ class Similarity {
    * @return mixed
    */
   protected function setDefault($option_default) {
-    if (!empty($option_default['#has_children'])) {
+    $children = element_children($option_default);
+    if (!empty($children)) {
       $option_default['#default_value'] = array();
-      foreach (element_children($option_default) as $child) {
+      foreach ($children as $child) {
         $option_default['#default_value'][$child] = $this->setDefault($option_default[$child]);
       }
     }
