@@ -2,3 +2,4 @@ name = Similarity
 description = "Basic module to create the similarities between different content types"
 core = 6.x
 dependencies[] = 'ctools'
+dependencies[] = 'drupal_queue'

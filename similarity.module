@@ -13,6 +13,44 @@
  */
 
 /**
+ * Implementation of hook_cron_queue_info().
+ */
+function similarity_cron_queue_info() {
+  return array(
+    'similarity_calculate' => array(
+      'worker callback' => 'similarity_calculate_work',
+      'time' => variable_get('similarity_calculate_time', 15),
+    ),
+  );
+}
+
+/**
+ * DrupalQueue worker callback.
+ *
+ * @param $job_info
+ *  An array of the machine name for the object and the id.
+ */
+function similarity_calculate_work($job_info) {
+  $sim  = similarity_load($job_info['machine_name']);
+  $sim->calculate($job_info['id'], $sim->findCandidates());
+}
+
+/**
+ * Implementation of hook_cron().
+ */
+function similarity_cron() {
+  $queue = drupal_queue_get('similarity_calculate');
+
+  foreach (similarity_all_objects() as $sim) {
+    foreach($sim->findCandidates() as $id) {
+      if ($queue->createItem(array($sim->machine_name, $id)) == FALSE) {
+        // DOH!
+      }
+    }
+  }
+}
+
+/**
  * Implementation of hook_ctools_plugin_api().
  */
 function similarity_ctools_plugin_api($module, $api) {
@@ -149,6 +187,19 @@ function similarity_all_objects($load_disabled = FALSE) {
 }
 
 /**
+ * Load a specific similarity object.
+ *
+ * @param $machine_name.
+ *  Name of the object.
+ */
+function similarity_load($machine_name) {
+  ctools_include('export');
+  $matching_objects = ctools_export_load_object('similarity_objects', 'name', array($machine_name));
+
+  return similarity_create(current($matching_objects));
+}
+
+/**
  * Instantiate a given similarity object in memory.
  *
  * @param stdClass $ctools_object
@@ -158,8 +209,12 @@ function similarity_all_objects($load_disabled = FALSE) {
  *  The fully loaded and instatiated similarity object.
  */
 function similarity_create($ctools_object) {
+  static $created_similarities = array();
   ctools_include('similarity', 'similarity');
-  return new Similarity($ctools_object->machine_name, $ctools_object->options);
+  if (!isset($created_similarities[$ctools_object->machine_name])) {
+    $created_similarities[$ctools_object->machine_name] = new Similarity($ctools_object->machine_name, $ctools_object->options);
+  }
+  return $created_similarities[$ctools_object->machine_name];
 }
 
 // util functions

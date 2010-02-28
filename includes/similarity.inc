@@ -145,7 +145,9 @@ class Similarity {
         $other_tokens = $this->tokenize($other_id);
         $similarity = similarity_execute_library('algorithm', $this->options['algorithm']['callback_id'], array($base_tokens, $other_tokens, $this->options['algorithm']['options']));
 
-        $this->saveSimilarity($object_id, $other_id, $similarity);
+        if ($similarity >= $this->options['min_sim']) {
+          $this->saveSimilarity($object_id, $other_id, $similarity);
+        }
       }
     }
   }
