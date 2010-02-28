@@ -47,7 +47,7 @@ function similarity_cosine($a, $b, $options) {
   if ($a_total == 0 || $b_total == 0 ) {
     return 0;
   }
-  
+
   return ($dot_product / sqrt($a_total * $b_total));
 }
 
@@ -61,6 +61,8 @@ function similarity_cosine($a, $b, $options) {
  *  a tid => tf/idf array for all terms assigned to the node.
  */
 function similarity_taxonomy_tokens($nid, $options) {
+  static $total_nodes = NULL, $idf = array();
+  // @TODO: investigate creating a query based on the Similarity->conditions.
   if ($options['vid'] == 0) {
     $tids = db_query("SELECT tid FROM {term_node} WHERE nid = %d", $nid);
   }
@@ -69,10 +71,29 @@ function similarity_taxonomy_tokens($nid, $options) {
   }
   $tokens = array();
 
-  while ($tid_object = db_fetch_object($tids)) {
-    // @TODO: calculate tf/idf.
-    $tokens[$tid_object->tid] = 1;
+  if (!isset($total_nodes)) {
+    $total_nodes = db_result(db_query("SELECT COUNT(nid) FROM {node}"));
   }
+
+  while ($tid_object = db_fetch_object($tids)) {
+    // Calculate IDF.
+    if (!isset($idf[$tid_object->tid])) {
+      if (module_exists('term_node_count')) {
+        $frequency = db_result(db_query("SELECT node_count FROM {term_node_count} WHERE tid = %d", $tid_object->tid));
+      }
+      else {
+        $frequency = db_result(db_query("SELECT COUNT(tid) FROM {term_node} WHERE tid = %d", $tid_object->tid));
+      }
+      $idf[$tid_object->tid] = $total_nodes / $frequency;
+    }
+
+    // The tokens are keyed by 'word' and the value is
+    // TF / IDF (term frequency divided by inverse document frequency)
+    // Where term frequency is one (a term can only be applied once to a node)
+    // and idf is number nodes divided by the number of nodes with this term.
+    $tokens[$tid_object->tid] = 1 / $idf[$tid_object->tid];
+  }
+
   return $tokens;
 }
 
