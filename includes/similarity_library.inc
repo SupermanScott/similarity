@@ -7,13 +7,13 @@
  */
 
 /**
- * calculates teh cosine between objects a and b
+ * calculates the cosine between objects a and b
  *
  * @param $a
- * array of revelancy scores keyed by word i.e 'wizard' => 7.33333.
+ * array of relevancy scores keyed by word i.e 'wizard' => 7.33333.
  *
  * @param $b
- *   array of revelancy scores keyed by word i.e 'wizard' => 7.33333.
+ *   array of relevancy scores keyed by word i.e 'wizard' => 7.33333.
  * 
  * @param $options
  *  $options from our settings form.
