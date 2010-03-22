@@ -159,7 +159,7 @@ class Similarity {
     $base_tokens = $this->tokenize($object_id);
 
     foreach ($object_set as $other_id) {
-      if ($other_id != $object_id) {
+      if ($other_id < $object_id) {
         $other_tokens = $this->tokenize($other_id);
         $similarity = similarity_execute_library('algorithm', $this->options['algorithm']['callback_id'], array($base_tokens, $other_tokens, $this->options['algorithm']['options']));
 
