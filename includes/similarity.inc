@@ -159,13 +159,18 @@ class Similarity {
     $base_tokens = $this->tokenize($object_id);
 
     foreach ($object_set as $other_id) {
-      if ($other_id < $object_id) {
-        $other_tokens = $this->tokenize($other_id);
-        $similarity = similarity_execute_library('algorithm', $this->options['algorithm']['callback_id'], array($base_tokens, $other_tokens, $this->options['algorithm']['options']));
+      if ($other_id >= $object_id) {
+        // Only calculate a similarity between the two pairs once. To ensure
+        // that happens, only calculate similarities between $object_id and all
+        // other ids less then it.
+        break;
+      }
+     
+      $other_tokens = $this->tokenize($other_id);
+      $similarity = similarity_execute_library('algorithm', $this->options['algorithm']['callback_id'], array($base_tokens, $other_tokens, $this->options['algorithm']['options']));
 
-        if ($similarity >= $this->options['min_sim']) {
-          $this->saveSimilarity($object_id, $other_id, $similarity);
-        }
+      if ($similarity >= $this->options['min_sim']) {
+        $this->saveSimilarity($object_id, $other_id, $similarity);
       }
     }
   }
@@ -230,6 +235,8 @@ class Similarity {
     if (!empty($query['filters'])) {
       $query_string .= " WHERE " . implode(" AND ", $query['filters']);
     }
+
+    $query_string .= " ORDER BY {" . $this->options['base'] . "}." . $this->options['base_field'] . " ASC";
 
     $result = db_query($query_string, $query['arguments']);
     $ids = array();
