@@ -22,10 +22,10 @@ class Similarity {
 
   public function __construct($name, $options) {
     $this->machine_name = $name;
-    $this->setOptions($options);
+    $this->options = $this->compileOptions($options, $this->defaultOptions($this->optionsDefinition()));
   }
 
-  protected function optionsDefaults() {
+  protected function optionsDefinition() {
     return array(
       'title' => array('#default_value' => ''),
       'min_sim' => array('#default_value' => 50),
@@ -48,37 +48,55 @@ class Similarity {
   }
 
   /**
-   * Set the options by respecting the defaults.
+   * Take option definition and produces an options array.
    */
-  protected function setOptions($options) {
-    $defaults = $this->optionsDefaults();
-    $option_keys = element_children($defaults);
-
-    foreach ($option_keys as $key) {
-      if (!isset($options[$key])) {
-        $options[$key] = $this->setDefault($defaults[$key]);
+  protected function defaultOptions($defaults) {
+    $options = array();
+    foreach (element_children($defaults) as $key) {
+      if (isset($defaults[$key]['#default_value'])) {
+        $options[$key] = $defaults[$key]['#default_value'];
+      }
+      else {
+        $options[$key] = $this->defaultOptions($defaults[$key]);
       }
     }
-    $this->options = $options;
-  }
+
+    return $options;
+	}
 
   /**
-   * Recursive function to find the default value.
-   *
-   * @param $option_default
-   *  The option default definition for this field.
-   *
-   * @return mixed
+   * Set the options by respecting the defaults.
    */
-  protected function setDefault($option_default) {
-    $children = element_children($option_default);
-    if (!empty($children)) {
-      $option_default['#default_value'] = array();
-      foreach ($children as $child) {
-        $option_default['#default_value'][$child] = $this->setDefault($option_default[$child]);
+  protected function compileOptions($options, $default_options) {
+    $compiled_options = array();
+
+    // If there isn't a default for this, then use the $options as is.
+    if (empty($default_options) && !empty($options)) {
+      $compiled_options = $options;
+    }
+    // If there are no more overrides, use the defaults as is
+    elseif (empty($options)) {
+      $compiled_options = $default_options;
+    }
+    // Otherwise, compile them together.
+    else {
+      foreach ($default_options as $key => $option) {
+        if (is_array($option)) {
+          if (!isset($options[$key])) {
+            $options[$key] = array();
+          }
+          $compiled_options[$key] = $this->compileOptions($options[$key], $default_options[$key]);
+        }
+        elseif (isset($options[$key]) && !is_array($options[$key])) {
+          $compiled_options[$key] = $options[$key];
+        }
+        else {
+          $compiled_options[$key] = $default_options[$key];
+        }
       }
     }
-    return $option_default['#default_value'];
+
+    return $compiled_options;
   }
 
   /**
