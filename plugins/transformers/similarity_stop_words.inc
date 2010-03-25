@@ -687,7 +687,6 @@ $plugin = array(
  *  The new tokens.
  */
 function similarity_transformer_stop_words($tokens, $options) {
-  dpm($options);
   foreach ($options['stop_words'] as $stop_word) {
     if (isset($tokens[$stop_word])) {
       unset($tokens[$stop_word]);
