@@ -173,7 +173,7 @@ class Similarity {
         // other ids less then it.
         break;
       }
-     
+
       $other_tokens = $this->tokenize($other_id);
       $similarity = $algorithm($base_tokens, $other_tokens, $this->options['algorithm']['options']);
       if ($similarity >= $this->options['min_sim']) {
@@ -229,8 +229,8 @@ class Similarity {
       'joins' => array(),
     );
 
-    foreach ($this->options['conditions'] as $condition_defintion) {
-      $condition_function = ctools_plugin_load_function('similarity', 'conditions', $condition_defintion['callback_id']);
+    foreach ($this->options['conditions'] as $condition_definition) {
+      $condition_function = ctools_plugin_load_function('similarity', 'conditions', $condition_definition['callback_id'], 'callback');
       if ($condition_function) {
         $query = $condition_function($query, $condition_definition['options']);
       }
