@@ -36,12 +36,12 @@ class Similarity {
       'base_field' => array('#default_value' => 'nid'),
       'conditions' => array('#default_value' => array()),
       'tokenizer' => array(
-        'callback_id' => array('#default_value' => ''),
+        'plugin_id' => array('#default_value' => ''),
         'options' => array('#default_value' => array()),
       ),
       'transformers' => array('#default_value' => array()),
       'algorithm' => array(
-        'callback_id' => array('#default_value' => 'similarity_cosine'),
+        'plugin_id' => array('#default_value' => 'similarity_cosine'),
         'options' => array(
           '#default_value' => array(),
         ),
@@ -88,12 +88,12 @@ class Similarity {
   protected function tokenize($object_id) {
     $tokens = array();
 
-    $tokenizer_function = ctools_plugin_load_function('similarity', 'tokenizers', $this->options['tokenizer']['callback_id'], 'callback');
+    $tokenizer_function = ctools_plugin_load_function('similarity', 'tokenizers', $this->options['tokenizer']['plugin_id'], 'callback');
 
     $tokens = $tokenizer_function($object_id, $this->options['tokenizer']['options'], $this->options['base']);
 
     foreach ($this->options['transformers'] as $transformer_definition) {
-      $transformer = ctools_plugin_load_function('similarity', 'transformers', $transformer_definition['callback_id']);
+      $transformer = ctools_plugin_load_function('similarity', 'transformers', $transformer_definition['plugin_id']);
       if ($transformer) {
         $tokens = $transformer($tokens, $transformer_definition['options']);
       }
@@ -112,7 +112,7 @@ class Similarity {
    */
   public function calculate($object_id, $object_set) {
     $base_tokens = $this->tokenize($object_id);
-    $algorithm = ctools_plugin_load_function('similarity', 'algorithms', $this->options['algorithm']['callback_id'], 'callback');
+    $algorithm = ctools_plugin_load_function('similarity', 'algorithms', $this->options['algorithm']['plugin_id'], 'callback');
 
     foreach ($object_set as $other_id) {
       if ($other_id >= $object_id) {
@@ -178,7 +178,7 @@ class Similarity {
     );
 
     foreach ($this->options['conditions'] as $condition_definition) {
-      $condition_function = ctools_plugin_load_function('similarity', 'conditions', $condition_definition['callback_id'], 'callback');
+      $condition_function = ctools_plugin_load_function('similarity', 'conditions', $condition_definition['plugin_id'], 'callback');
       if ($condition_function) {
         $query = $condition_function($query, $condition_definition['options']);
       }

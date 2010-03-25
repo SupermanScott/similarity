@@ -70,14 +70,14 @@ function similarity_similarity_objects_default($export_defintion) {
   $test_object->options = array(
     'title' => 'Test Object',
     'tokenizer' => array(
-      'callback_id' => 'similarity_taxonomy',
+      'plugin_id' => 'similarity_taxonomy',
       'options' => array(
         'vid' => 0,
       ),
     ),
     'conditions' => array(
       array(
-        'callback_id' => 'similarity_node_type',
+        'plugin_id' => 'similarity_node_type',
         'options' => array(
           'types' => array(
             'story',
