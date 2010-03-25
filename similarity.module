@@ -43,7 +43,7 @@ function similarity_cron() {
 
   foreach (similarity_all_objects() as $sim) {
     foreach($sim->findCandidates() as $id) {
-      if ($queue->createItem(array($sim->machine_name, $id)) == FALSE) {
+      if ($queue->createItem(array('machine_name' => $sim->machine_name, 'id' => $id)) == FALSE) {
         // DOH!
       }
     }
