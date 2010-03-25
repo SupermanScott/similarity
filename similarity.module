@@ -190,3 +190,67 @@ function similarity_export($machine_name, $indent = '') {
     return ctools_export_object('similarity_object', $result[$machine_name], $indent);
   }
 }
+
+/**
+ * Compress an option definition into a multidimensional array.
+ *
+ * @param $option_definition
+ *   A structured Drupal array.
+ * @return array
+ *   The compressed version of the options.
+ */
+function similarity_compress_option_definition($option_definition) {
+  $options = array();
+  foreach (element_children($option_definition) as $key) {
+    if (isset($option_definition[$key]['#default_value'])) {
+      $options[$key] = $option_definition[$key]['#default_value'];
+    }
+    else {
+      $options[$key] = similarity_compress_option_definition($option_definition[$key]);
+    }
+  }
+
+  return $options;
+}
+
+/**
+ * Compile a set of options from the defaults and the provided options.
+ *
+ * @param $options
+ *   The provided options that will override the defaults.
+ * @param $default_options
+ *   The default options.
+ * @return array
+ *   The entire option structure with the $options overridding the defaults.
+ */
+function similarity_compile_options($options, $default_options) {
+  $compiled_options = array();
+
+  // If there isn't a default for this, then use the $options as is.
+  if (empty($default_options) && !empty($options)) {
+    $compiled_options = $options;
+  }
+  // If there are no more overrides, use the defaults as is
+  elseif (empty($options)) {
+    $compiled_options = $default_options;
+  }
+  // Otherwise, compile them together.
+  else {
+    foreach ($default_options as $key => $option) {
+      if (is_array($option)) {
+        if (!isset($options[$key])) {
+          $options[$key] = array();
+        }
+        $compiled_options[$key] = similarity_compile_options($options[$key], $default_options[$key]);
+      }
+      elseif (isset($options[$key]) && !is_array($options[$key])) {
+        $compiled_options[$key] = $options[$key];
+      }
+      else {
+        $compiled_options[$key] = $default_options[$key];
+      }
+    }
+  }
+
+  return $compiled_options;
+}

@@ -22,7 +22,7 @@ class Similarity {
 
   public function __construct($name, $options) {
     $this->machine_name = $name;
-    $this->options = $this->compileOptions($options, $this->defaultOptions($this->optionsDefinition()));
+    $this->options = similarity_compile_options($options, similarity_compress_option_definition($this->optionsDefinition()));
 
     ctools_include('plugins');
   }
@@ -47,58 +47,6 @@ class Similarity {
         ),
       ),
     );
-  }
-
-  /**
-   * Take option definition and produces an options array.
-   */
-  protected function defaultOptions($defaults) {
-    $options = array();
-    foreach (element_children($defaults) as $key) {
-      if (isset($defaults[$key]['#default_value'])) {
-        $options[$key] = $defaults[$key]['#default_value'];
-      }
-      else {
-        $options[$key] = $this->defaultOptions($defaults[$key]);
-      }
-    }
-
-    return $options;
-	}
-
-  /**
-   * Set the options by respecting the defaults.
-   */
-  protected function compileOptions($options, $default_options) {
-    $compiled_options = array();
-
-    // If there isn't a default for this, then use the $options as is.
-    if (empty($default_options) && !empty($options)) {
-      $compiled_options = $options;
-    }
-    // If there are no more overrides, use the defaults as is
-    elseif (empty($options)) {
-      $compiled_options = $default_options;
-    }
-    // Otherwise, compile them together.
-    else {
-      foreach ($default_options as $key => $option) {
-        if (is_array($option)) {
-          if (!isset($options[$key])) {
-            $options[$key] = array();
-          }
-          $compiled_options[$key] = $this->compileOptions($options[$key], $default_options[$key]);
-        }
-        elseif (isset($options[$key]) && !is_array($options[$key])) {
-          $compiled_options[$key] = $options[$key];
-        }
-        else {
-          $compiled_options[$key] = $default_options[$key];
-        }
-      }
-    }
-
-    return $compiled_options;
   }
 
   /**
