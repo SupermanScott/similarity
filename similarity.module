@@ -92,53 +92,12 @@ function similarity_similarity_objects_default($export_defintion) {
 }
 
 /**
- * Implementation of hook_similarity_library().
+ * Implementation of hook_ctools_plugin_directory().
  */
-function similarity_similarity_library() {
-  $library = array(
-    'condition' => array(
-      'similarity_node_type' => array(
-        'title' => t('Node Type'),
-        'function' => 'similarity_condition_node_type',
-        'options' => array(
-          'types' => array(),
-        ),
-      ),
-    ),
-    'tokenizer' => array(
-      'similarity_search' => array(
-        'title' => t('Search Index'),
-        'function' => 'similarity_search_tokens',
-      ),
-      'similarity_taxonomy' => array(
-        'title' => t('Taxonomy'),
-        'function' => 'similarity_taxonomy_tokens',
-        'options' => array(
-          'vid' => array('#default_value' => 0),
-        ),
-      ),
-    ),
-    'transformer' => array(),
-    'algorithm' => array(
-      'similarity_cosine' => array(
-        'title' => t('Cosine Similarity'),
-        'function' => 'similarity_cosine',
-      ),
-    ),
-  );
-
-  foreach (array('tokenizer', 'transformer', 'algorithm', 'condition') as $type) {
-    foreach (array_keys($library[$type]) as $library_callbacks) {
-      $library[$type][$library_callbacks] += array(
-        'path' => 'includes',
-        'file' => 'similarity_library',
-        'module' => 'similarity',
-        'base' => array('node'),
-      );
-    }
+function similarity_ctools_plugin_directory($module, $plugin) {
+  if ($module == 'similarity') {
+    return 'plugins/' . $plugin;
   }
-
-  return $library;
 }
 
 /**
@@ -227,53 +186,4 @@ function similarity_export($machine_name, $indent = '') {
   if (isset($result[$machine_name])) {
     return ctools_export_object('similarity_object', $result[$machine_name], $indent);
   }
-}
-
-/**
- * Load up all library functions.
- */
-function similarity_load_library() {
-  static $library = NULL;
-  if (!isset($libraries)) {
-    $library = module_invoke_all('similarity_library');
-    drupal_alter('similarity_library', $libraries);
-  }
-
-  return $library;
-}
-
-/**
- * Load a specific library callback.
- *
- * @param $type
- *  The library callback type.
- *
- * @param $callback_id
- *  The unique id for this callback.
- */
-function similarity_load_callback($type, $callback_id) {
-  $library = similarity_load_library();
-  return $library[$type][$callback_id];
-}
-
-/**
- * Load a library function and return its result.
- *
- * @param $type
- *  library function type.
- *
- * @param $callback_id
- *  Name of the function.
- *
- * @param $params
- *  The parameters to pass into the function.
- */
-function similarity_execute_library($type, $callback_id, $params = array()) {
-  $callback = similarity_load_callback($type, $callback_id);
-
-  if (isset($callback['path'], $callback['file'], $callback['module'])) {
-    ctools_include($callback['file'], $callback['module'], $callback['path']);
-  }
-
-  return call_user_func_array($callback['function'], $params);
 }
