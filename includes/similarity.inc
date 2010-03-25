@@ -30,7 +30,7 @@ class Similarity {
   protected function optionsDefinition() {
     return array(
       'title' => array('#default_value' => ''),
-      'min_sim' => array('#default_value' => 50),
+      'min_sim' => array('#default_value' => 0.50),
       'time_limit' => array('#default_value' => 15),
       'base' => array('#default_value' => 'node'),
       'base_field' => array('#default_value' => 'nid'),
