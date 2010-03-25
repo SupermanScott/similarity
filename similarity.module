@@ -155,7 +155,10 @@ function similarity_load($machine_name) {
   ctools_include('export');
   $matching_objects = ctools_export_load_object('similarity_objects', 'names', array($machine_name));
 
-  return similarity_create(current($matching_objects));
+  if (isset($matching_objects[$machine_name])) {
+    return similarity_create($matching_objects[$machine_name]);
+  }
+  return FALSE;
 }
 
 /**
