@@ -70,17 +70,26 @@ function similarity_similarity_objects_default($export_defintion) {
   $test_object->options = array(
     'title' => 'Test Object',
     'tokenizer' => array(
-      'plugin_id' => 'similarity_taxonomy',
-      'options' => array(
-        'vid' => 0,
-      ),
+      'plugin_id' => 'similarity_search',
+      'options' => array(),
     ),
     'conditions' => array(
       array(
         'plugin_id' => 'similarity_node_type',
         'options' => array(
           'types' => array(
-            'story',
+            'page',
+          ),
+        ),
+      ),
+    ),
+    'transformers' => array(
+      array(
+        'plugin_id' => 'similarity_stop_words',
+        'options' => array(
+          'stop_words' => array(
+            'lobortis',
+            'incassum',
           ),
         ),
       ),
