@@ -153,7 +153,7 @@ function similarity_all_objects($load_disabled = FALSE) {
  */
 function similarity_load($machine_name) {
   ctools_include('export');
-  $matching_objects = ctools_export_load_object('similarity_objects', 'name', array($machine_name));
+  $matching_objects = ctools_export_load_object('similarity_objects', 'names', array($machine_name));
 
   return similarity_create(current($matching_objects));
 }
