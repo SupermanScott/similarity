@@ -212,7 +212,7 @@ class Similarity {
 
     db_query('UPDATE {similarity_' . $this->machine_name . '} SET score = %f, created = %d WHERE nid1 = %d AND nid2 = %d', $similarity, time(), $nid1, $nid2);
     if (!db_affected_rows()) {
-      db_query('INSERT INTO {similarity_' . $this->machine_name . '} (score, created, nid1, nid2) VALUE (%f, %d, %d)', $similarity, time(), $nid1, $nid2);
+      db_query('INSERT INTO {similarity_' . $this->machine_name . '} (score, created, nid1, nid2) VALUE (%f, %d, %d, %d)', $similarity, time(), $nid1, $nid2);
     }
   }
 
