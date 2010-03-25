@@ -93,7 +93,7 @@ class Similarity {
     $tokens = $tokenizer_function($object_id, $this->options['tokenizer']['options'], $this->options['base']);
 
     foreach ($this->options['transformers'] as $transformer_definition) {
-      $transformer = ctools_plugin_load_function('similarity', 'transformers', $transformer_definition['plugin_id']);
+      $transformer = ctools_plugin_load_function('similarity', 'transformers', $transformer_definition['plugin_id'], 'callback');
       if ($transformer) {
         $tokens = $transformer($tokens, $transformer_definition['options']);
       }
