@@ -20,6 +20,9 @@ class Similarity {
   // The configuration options are stored in here.
   protected $options = array();
 
+  // Candidates for the calculations.
+  protected $candidates = NULL;
+
   public function __construct($name, $options) {
     $this->machine_name = $name;
     $this->options = similarity_compile_options($options, similarity_compress_option_definition($this->optionsDefinition()));
@@ -171,38 +174,50 @@ class Similarity {
    *  an array for $this->base_field ids.
    */
   public function findCandidates() {
-    $query = array(
-      'filters' => array(),
-      'arguments' => array(),
-      'joins' => array(),
-    );
+    // Use the property $candidates as a static cache.
+    if (!isset($this->candidates)) {
+      $query = array(
+        'filters' => array(),
+        'arguments' => array(),
+        'joins' => array(),
+      );
 
-    foreach ($this->options['conditions'] as $condition_definition) {
-      $condition_function = ctools_plugin_load_function('similarity', 'conditions', $condition_definition['plugin_id'], 'callback');
-      if ($condition_function) {
-        $query = $condition_function($query, $condition_definition['options']);
+      foreach ($this->options['conditions'] as $condition_definition) {
+        $condition_function = ctools_plugin_load_function('similarity', 'conditions', $condition_definition['plugin_id'], 'callback');
+        if ($condition_function) {
+          $query = $condition_function($query, $condition_definition['options']);
+        }
       }
-    }
 
-    // Build the query based on the $query array.
-    $query_string = "SELECT {" . $this->options['base'] . "}." . $this->options['base_field'] . " FROM {" . $this->options['base'] . "}";
-    if (!empty($query['joins'])) {
-      $query_string .= " " . implode(" ", $query['joins']);
-    }
+      // Build the query based on the $query array.
+      $query_string = "SELECT {" . $this->options['base'] . "}." . $this->options['base_field'] . " FROM {" . $this->options['base'] . "}";
+      if (!empty($query['joins'])) {
+        $query_string .= " " . implode(" ", $query['joins']);
+      }
 
-    if (!empty($query['filters'])) {
-      $query_string .= " WHERE " . implode(" AND ", $query['filters']);
-    }
+      if (!empty($query['filters'])) {
+        $query_string .= " WHERE " . implode(" AND ", $query['filters']);
+      }
 
-    $query_string .= " ORDER BY {" . $this->options['base'] . "}." . $this->options['base_field'] . " ASC";
+      $query_string .= " ORDER BY {" . $this->options['base'] . "}." . $this->options['base_field'] . " ASC";
 
-    $result = db_query($query_string, $query['arguments']);
-    $ids = array();
-    while ($row = db_fetch_object($result)) {
-      $ids[] = $row->{$this->options['base_field']};
+      $result = db_query($query_string, $query['arguments']);
+      $ids = array();
+      while ($row = db_fetch_object($result)) {
+        $ids[] = $row->{$this->options['base_field']};
+      }
+
+      $this->candidates = $ids;
     }
-    return $ids;
-	}
+    return $this->candidates;
+  }
+
+  /**
+   * Reset the candidates cache.
+   */
+  public function resetCandidates() {
+    $this->candidates = NULL;
+  }
 
   /**
    * Provide the schema definition for this object.
