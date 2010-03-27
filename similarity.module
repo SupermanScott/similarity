@@ -214,6 +214,43 @@ function similarity_create($ctools_object) {
   return $created_similarities[$ctools_object->machine_name];
 }
 
+/**
+ * Implementation of hook_nodeapi().
+ */
+function simliarity_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
+  if ($op == 'insert') {
+    similarity_node_insert($node);
+  }
+  if ($op == 'update') {
+    similarity_node_update($node);
+  }
+}
+
+/**
+ * Implementation of hook_node_insert().
+ */
+function similarity_node_insert($node) {
+  $queue = drupal_queue_get('similarity_calculate');
+
+  foreach (similarity_all_objects() as $sim) {
+    $sim->resetCandidates();
+    $canidates = $sim->findCandidates();
+    if (in_array($node->nid, $canidates)) {
+      $queue->createItem(array('machine_name' => $sim->machine_name, 'id' => $node->nid));
+    }
+  }
+}
+
+/**
+ * Implementation of hook_node_update().
+ */
+function similarity_node_update($node) {
+  foreach (similarity_all_objects() as $sim) {
+    // @TODO: how do handle the node update.
+    cache_clear_all($sim->machine_name . ':' . $node->nid, 'cache_similarity_tokens');
+  }
+}
+
 // util functions
 /**
  * Export a Similarity configuration to code.
