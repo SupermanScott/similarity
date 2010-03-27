@@ -71,8 +71,10 @@ function similarity_similarity_objects_default($export_defintion) {
     'title' => 'Test Object',
     'description' => 'This is a long long long description This is a long long long description This is a long long long description This is a long long long description This is a long long long description This is a long long long description This is a long long long description This is a long long long description This is a long long long description',
     'tokenizer' => array(
-      'plugin_id' => 'similarity_search',
-      'options' => array(),
+      'plugin_id' => 'similarity_taxonomy',
+      'options' => array(
+        'vid' => 0,
+      ),
     ),
     'conditions' => array(
       array(

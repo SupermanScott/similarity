@@ -38,6 +38,10 @@ function similarity_schema() {
     ),
     'primary key' => array('machine_name'),
   );
+
+  $cache_table = drupal_get_schema_unprocessed('system', 'cache');
+  $schema['cache_similarity_tokens'] = $cache_table;
+  $schema['cache_similarity_tokens']['description'] = 'Caches the tokens generated from a specific base table id';
   
   return $schema;
 }

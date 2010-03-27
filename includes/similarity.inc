@@ -96,16 +96,21 @@ class Similarity {
   protected function tokenize($object_id) {
     $tokens = array();
 
+    $cached_data = cache_get($this->machine_name . ':' . $object_id, 'cache_similarity_tokens');
+    if (!empty($cached_data)) {
+      return $cached_data->data;
+    }
     $tokenizer_function = ctools_plugin_load_function('similarity', 'tokenizers', $this->options['tokenizer']['plugin_id'], 'callback');
 
     $tokens = $tokenizer_function($object_id, $this->options['tokenizer']['options'], $this->options['base']);
-
     foreach ($this->options['transformers'] as $transformer_definition) {
       $transformer = ctools_plugin_load_function('similarity', 'transformers', $transformer_definition['plugin_id'], 'callback');
       if ($transformer) {
         $tokens = $transformer($tokens, $transformer_definition['options']);
       }
     }
+
+    cache_set($this->machine_name . ':' . $object_id, $tokens, 'cache_similarity_tokens');
     return $tokens;
   }
 
