@@ -23,16 +23,21 @@ class Similarity {
   // Candidates for the calculations.
   protected $candidates = NULL;
 
-  public function __construct($name, $options) {
-    $this->machine_name = $name;
-    $this->options = similarity_compile_options($options, similarity_compress_option_definition($this->optionsDefinition()));
+  // Base object.
+  protected $ctools_base_object;
 
+  public function __construct($ctools_object) {
+    $this->machine_name = $ctools_object->machine_name;
+    $this->options = similarity_compile_options($ctools_object->options, similarity_compress_option_definition($this->optionsDefinition()));
+
+    $this->ctools_base_object = $ctools_object;
     ctools_include('plugins');
   }
 
   protected function optionsDefinition() {
     return array(
       'title' => array('#default_value' => ''),
+      'description' => array('#default_value' => ''),
       'min_sim' => array('#default_value' => 0.50),
       'time_limit' => array('#default_value' => 15),
       'base' => array('#default_value' => 'node'),
@@ -220,6 +225,20 @@ class Similarity {
   }
 
   /**
+   * Return the title.
+   */
+  public function title() {
+    return $this->options['title'];
+  }
+
+  /**
+   * Return the description.
+   */
+  public function description() {
+    return $this->options['description'];
+  }
+
+  /**
    * Provide the schema definition for this object.
    */
   protected function schema() {
@@ -298,5 +317,15 @@ class Similarity {
     );
 
     return $data;
+  }
+
+  /**
+   * Generic get function to return ctools object properties.
+   */
+  public function __get($property) {
+    if (isset($this->ctools_base_object->$property)) {
+      return $this->ctools_base_object->$property;
+    }
+    return NULL;
   }
 }

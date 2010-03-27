@@ -69,6 +69,7 @@ function similarity_similarity_objects_default($export_defintion) {
   $test_object->machine_name = 'test';
   $test_object->options = array(
     'title' => 'Test Object',
+    'description' => 'This is a long long long description This is a long long long description This is a long long long description This is a long long long description This is a long long long description This is a long long long description This is a long long long description This is a long long long description This is a long long long description',
     'tokenizer' => array(
       'plugin_id' => 'similarity_search',
       'options' => array(),
@@ -183,7 +184,7 @@ function similarity_create($ctools_object) {
   static $created_similarities = array();
   ctools_include('similarity', 'similarity');
   if (!isset($created_similarities[$ctools_object->machine_name])) {
-    $created_similarities[$ctools_object->machine_name] = new Similarity($ctools_object->machine_name, $ctools_object->options);
+    $created_similarities[$ctools_object->machine_name] = new Similarity($ctools_object);
   }
   return $created_similarities[$ctools_object->machine_name];
 }
