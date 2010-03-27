@@ -1,0 +1,17 @@
+.similarity-admin-links ul.links {
+  float: right;
+}
+
+.similarity-admin-links ul.links li a {
+  float: left;
+  padding-right: .5em;
+  padding-left: .5em;
+}
+
+.similarity-admin-links ul.links li:after {
+  content: '|';
+}
+
+.similarity-admin-links ul.links li.last:after {
+  content: '';
+}

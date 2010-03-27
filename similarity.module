@@ -118,10 +118,33 @@ function similarity_menu() {
     'admin/build/similarity' => array(
       'title' => 'Similarity Objects',
       'page callback' => 'similarity_objects_overview',
-      'file' => 'similarity.pages',
+      'file' => 'similarity.pages.inc',
       'access arguments' => array('administer similarity'),
     ),
+    'admin/build/similarity/delete/%similarity' => array(
+      'title callback' => 'similarity_admin_title',
+      'title arguments' => array('delete', 4),
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('similarity_object_delete', 4),
+      'file' => 'similarity.pages.inc',
+      'access callback' => 'similarity_delete_access',
+      'access arguments' => array(4),
+    ),
   );
+}
+
+/**
+ * Menu title callback.
+ */
+function similarity_admin_title($op, $similarity_object) {
+  return t(drupal_ucfirst($op)) . ' ' . $similarity_object->title();
+}
+
+/**
+ * Access callback to delete a similarity.
+ */
+function similarity_delete_access($similarity_object) {
+  return $similarity_object->export_type & EXPORT_IN_DATABASE && user_access('administer similarity');
 }
 
 /**
@@ -263,4 +286,17 @@ function similarity_compile_options($options, $default_options) {
   }
 
   return $compiled_options;
+}
+
+/**
+ * Implementation of hook_theme().
+ */
+function similarity_theme() {
+  $theme_path = drupal_get_path('module', 'similarity') . '/theme';
+  return array(
+    'similarity_object_overview' => array(
+      'arguments' => array('element' => NULL),
+      'file' => 'theme/theme.inc',
+    ),
+  );
 }
