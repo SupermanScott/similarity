@@ -91,9 +91,9 @@ function similarity_similarity_objects_default($export_defintion) {
 /**
  * Implementation of hook_ctools_plugin_directory().
  */
-function similarity_ctools_plugin_directory($module, $plugin) {
+function similarity_ctools_plugin_directory($module, $plugin_type) {
   if ($module == 'similarity') {
-    return 'plugins/' . $plugin;
+    return 'plugins/' . $plugin_type;
   }
 }
 
