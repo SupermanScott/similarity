@@ -33,5 +33,13 @@ function similarity_condition_node_type($query, $options) {
 /**
  * Options form for the node type plugin.
  */
-function similarity_condition_node_type_form($form_state) {
+function similarity_condition_node_type_form($form_state, $options) {
+  return array(
+    'types' => array(
+      '#type' => 'checkboxes',
+      '#title' => t('Node Types'),
+      '#options' => node_get_types('names'),
+      '#default_value' => $options['types'],
+    ),
+  );
 }

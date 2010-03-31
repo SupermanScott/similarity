@@ -55,7 +55,7 @@ function similarity_similarity_objects_default($export_defintion) {
   $test_object->options = array(
     'title' => 'Test Object',
     'description' => 'This is a long long long description This is a long long long description This is a long long long description This is a long long long description This is a long long long description This is a long long long description This is a long long long description This is a long long long description This is a long long long description',
-    'tokenizer' => array(
+    'tokenizers' => array(
       'plugin_id' => 'similarity_taxonomy',
       'options' => array(
         'vid' => 0,
@@ -122,6 +122,15 @@ function similarity_menu() {
       'title arguments' => array('edit', 4),
       'page callback' => 'similarity_settings_page',
       'page arguments' => array(4),
+      'file' => 'similarity.pages.inc',
+      'access callback' => 'user_access',
+      'access arguments' => array('administer similarity'),
+    ),
+    'admin/build/similarity/edit/%similarity/%ctools_js' => array(
+      'title callback' => 'similarity_admin_title',
+      'title arguments' => array('edit', 4),
+      'page callback' => 'similarity_settings_page',
+      'page arguments' => array(4,5),
       'file' => 'similarity.pages.inc',
       'access callback' => 'user_access',
       'access arguments' => array('administer similarity'),
@@ -319,6 +328,16 @@ function similarity_compile_options($options, $default_options) {
   }
 
   return $compiled_options;
+}
+
+/**
+ * Save a similarity to the database.
+ */
+function similarity_save(Similarity $similarity) {
+  $result = drupal_write_record('similarity_objects', $similarity, 'machine_name');
+  if (empty($result)) {
+    drupal_write_record('similarity_objects', $form['#similarity']);
+  }
 }
 
 /**

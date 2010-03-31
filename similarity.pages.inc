@@ -74,10 +74,88 @@ function similarity_object_delete_submit($form, &$form_state) {
 }
 
 /**
+ * Find the options for a plugin.
+ *
+ */
+function similarity_find_options($options, $plugin_type, $plugin_id) {
+  if (in_array($plugin_type, array('conditions', 'transformers'))) {
+    foreach ($options[$plugin_type] as $plugin_info) {
+      if ($plugin_info['plugin_id'] == $plugin_id) {
+        return $plugin_info['options'];
+      }
+    }
+  }
+
+  return $options[$plugin_type]['options'];
+}
+
+/**
  * Edit Similarity form
  */
-function similarity_object_edit($form_state, $similarity) {
-  return $similarity->optionForm($form_state);
+function similarity_object_edit($form_state, $similarity, $category, $plugin_id) {
+  if ($category == 'basics') {
+    $form = $similarity->optionForm($form_state);
+  }
+  else {
+    $plugin_def = ctools_get_plugins('similarity', $category, $plugin_id);
+    $form = $plugin_def['options']['form_id']($form_state, similarity_find_options($similarity->options, $category, $plugin_id));
+  }
+
+  $form['#category'] = $category;
+  $form['#similarity'] = $similarity;
+  $form['#plugin_id'] = $plugin_id;
+  $form['buttons'] = array(
+    'save' => array(
+      '#type' => 'submit',
+      '#value' => t('Save'),
+      '#attributes' => array(
+        'class' => 'ctools-use-ajax',
+      ),
+      '#id' => 'similarity-save-button',
+    ),
+  );
+  $form['#submit'] = array('similarity_object_edit_submit_' . $category);
+  return $form;
+}
+
+/**
+ * FAPI Submit callback.
+ */
+function similarity_object_edit_submit_conditions($form, &$form_state) {
+  foreach ($form['#similarity']->options['conditions'] as $key => $plugin_info) {
+    if ($plugin_info['plugin_id'] == $form['#plugin_id']) {
+      $form['#similarity']->options['conditions'][$key]['options'] = $form_state['values'];
+    }
+  }
+  similarity_save($form['#similarity']);
+}
+
+/**
+ * FAPI Submit callback.
+ */
+function similarity_object_edit_submit_transformers($form, &$form_state) {
+  foreach ($form['#similarity']->options['transformers'] as $key => $plugin_info) {
+    if ($plugin_info['plugin_id'] == $form['#plugin_id']) {
+      $form['#similarity']->options['transformers'][$key]['options'] = $form_state['values'];
+    }
+  }
+  similarity_save($form['#similarity']);
+}
+
+/**
+ * FAPI Submit callback.
+ */
+function similarity_object_edit_submit_tokenizers($form, &$form_state) {
+  $form['#similarity']->options[$form['#category']]['options'] = $form_state['values'];
+  similarity_save($form['#similarity']);
+}
+
+/**
+ * FAPI Submit callback.
+ */
+function similarity_object_edit_submit_basics($form, &$form_state) {
+  $form['#similarity']->options = array_merge($form['#similarity']->options, $form_state['values']);
+  similarity_save($form['#similarity']);
 }
 
 /**
@@ -89,15 +167,18 @@ function similarity_object_edit($form_state, $similarity) {
  * @return string
  *   HTML string for the output.
  */
-function similarity_settings_page(Similarity $similarity) {
+function similarity_settings_page(Similarity $similarity, $js = FALSE, $action = 'edit', $section = 'basics', $plugin_id = '') {
   drupal_add_css(drupal_get_path('module', 'similarity') . '/theme/similarity.css');
+  //ctools_include('ajax');
+  //ctools_add_js('ajax-responder');
+  //ctools_include('form');
   $config_info = array();
   $basics = array(
     '#title' => t('Basics'),
     '#links' => array(
       'change' => array(
         'title' => t('Edit'),
-        'href' => 'admin/build/similarity/edit/' . $similarity->machine_name . '/nojs/basics',
+        'href' => 'admin/build/similarity/edit/' . $similarity->machine_name . '/nojs/edit/basics',
         'attributes' => array(
           'class' => 'ctools-use-ajax',
         ),
@@ -124,7 +205,7 @@ function similarity_settings_page(Similarity $similarity) {
     '#links' => array(
       'add' => array(
         'title' => t('Add'),
-        'href' => 'admin/build/similarity/edit/' . $similarity->machine_name . '/nojs/add/condition',
+        'href' => 'admin/build/similarity/edit/' . $similarity->machine_name . '/nojs/add/conditions',
         'attributes' => array(
           'class' => 'ctools-use-ajax',
         ),
@@ -141,14 +222,14 @@ function similarity_settings_page(Similarity $similarity) {
     $edit_remove = array(
       'edit' => array(
         'title' => t('Edit'),
-        'href' => 'admin/build/similarity/edit/' . $similarity->machine_name . '/nojs/edit/condition/' . $plugin_def['plugin_id'],
+        'href' => 'admin/build/similarity/edit/' . $similarity->machine_name . '/nojs/edit/conditions/' . $plugin_def['plugin_id'],
         'attributes' => array(
           'class' => 'ctools-use-ajax',
         ),
       ),
       'remove' => array(
         'title' => t('Remove'),
-        'href' => 'admin/build/similarity/edit/' . $similarity->machine_name . '/nojs/remove/condition/' . $plugin_def['plugin_id'],
+        'href' => 'admin/build/similarity/edit/' . $similarity->machine_name . '/nojs/remove/conditions/' . $plugin_def['plugin_id'],
         'attributes' => array(
           'class' => 'ctools-use-ajax',
         ),
@@ -162,24 +243,23 @@ function similarity_settings_page(Similarity $similarity) {
     );
   }
 
-  $tokenizer_plugin = ctools_get_plugins('similarity', 'tokenizers', $similarity->options['tokenizer']['plugin_id']);
+  $tokenizer_plugin = ctools_get_plugins('similarity', 'tokenizers', $similarity->options['tokenizers']['plugin_id']);
   $tokenizer_item = array(
     '#title' => $tokenizer_plugin['title'],
-    '#value' => theme('links', array('edit' => array('title' => t('Edit'), 'href' => 'admin/build/similarity/edit/' . $similarity->machine_name . '/nojs/edit/' . $similarity->options['tokenizer']['plugin_id']),
-                                    )));
+    '#value' => theme('links', array('edit' => array('title' => t('Edit'), 'href' => 'admin/build/similarity/edit/' . $similarity->machine_name . '/nojs/edit/tokenizers/' . $similarity->options['tokenizers']['plugin_id'], 'attributes' => array('class' => 'ctools-use-ajax')),)));
 
   $tokenizer = array(
     '#title' => t('Tokenizer'),
     '#links' => array(
       'change' => array(
         'title' => t('Change'),
-        'href' => 'admin/build/similarity/edit/' . $similarity->machine_name . '/nojs/change/tokenzier',
+        'href' => 'admin/build/similarity/edit/' . $similarity->machine_name . '/nojs/add/tokenizers',
         'attributes' => array(
           'class' => 'ctools-use-ajax',
         ),
       ),
     ),
-    $similarity->options['tokenizer']['plugin_id'] => $tokenizer_item,
+    $similarity->options['tokenizers']['plugin_id'] => $tokenizer_item,
     '#theme' => array('similarity_edit_container__tokenizer', 'similarity_edit_container'),
     '#attributes' => array(
       'class' => 'similarity-container-tokenizer',
@@ -191,7 +271,7 @@ function similarity_settings_page(Similarity $similarity) {
     '#links' => array(
       'add' => array(
         'title' => t('Add'),
-        'href' => 'admin/build/similarity/edit/' . $similarity->machine_name . '/nojs/add/transformer',
+        'href' => 'admin/build/similarity/edit/' . $similarity->machine_name . '/nojs/add/transformers',
         'attributes' => array(
           'class' => 'ctools-use-ajax',
         ),
@@ -208,14 +288,14 @@ function similarity_settings_page(Similarity $similarity) {
     $edit_remove = array(
       'edit' => array(
         'title' => t('Edit'),
-        'href' => 'admin/build/similarity/edit/' . $similarity->machine_name . '/nojs/edit/transformer/' . $plugin_def['plugin_id'],
+        'href' => 'admin/build/similarity/edit/' . $similarity->machine_name . '/nojs/edit/transformers/' . $plugin_def['plugin_id'],
         'attributes' => array(
           'class' => 'ctools-use-ajax',
         ),
       ),
       'remove' => array(
         'title' => t('Remove'),
-        'href' => 'admin/build/similarity/edit/' . $similarity->machine_name . '/nojs/remove/transformer/' . $plugin_def['plugin_id'],
+        'href' => 'admin/build/similarity/edit/' . $similarity->machine_name . '/nojs/remove/transformers/' . $plugin_def['plugin_id'],
         'attributes' => array(
           'class' => 'ctools-use-ajax',
         ),
@@ -229,7 +309,8 @@ function similarity_settings_page(Similarity $similarity) {
     );
   }
 
-  $main_section = "<div class='similarity-main-section'><div class='similarity-main-content'>text</div></div>";
+  $main_section_function = 'similarity_edit_main_section_' . $action;
+  $main_section = "<div class='similarity-main-section'><div class='similarity-main-content'>" . $main_section_function($js, $similarity, $section, $plugin_id) . "</div></div>";
 
   return '<div id="similarity-settings-content--' . $similarity->machine_name . '">' .
     '<div class="similarity-left-column">' .
@@ -240,4 +321,80 @@ function similarity_settings_page(Similarity $similarity) {
     '</div>' .
     $main_section .
     '</div>';
+}
+
+/**
+ * Return the html for the main section of the edit page for the 'edit' action.
+ *
+ * @param $js
+ *   Boolean on whether or not to return ajax commands.
+ * @param Similarity $similarity
+ *   The Similarity being edited.
+ * @param $section
+ *   The section of the similarity object being edited.
+ * @param $plugin_id
+ *   The id of the plugin being changed can be empty string.
+ *
+ * @return string
+ *   HTML to be render in the main section.
+ */
+function similarity_edit_main_section_edit($js, Similarity $similarity, $section, $plugin_id) {
+  if ($js) {
+    $commands = array();
+    $form_state = array(
+      'ajax' => TRUE,
+      'args' => array(
+        $similarity,
+        $section,
+        $plugin_id,
+      ),
+      're_render' => FALSE,
+      'no_redirect' => TRUE,
+    );
+    $form_render = ctools_build_form('similarity_object_edit', $form_state);
+    if (!empty($form_state['ajax']) && empty($form_state['executed'])) {
+      $commands[] = ctools_ajax_command_html('div.similarity-main-section > div.similarity-main-content', $form_render);
+    }
+    else {
+      $commands[] = ctools_ajax_command_html('div.similarity-main-section > div.similarity-main-content', 'hi');
+    }
+    ctools_ajax_render($commands);
+  }
+  else {
+    return drupal_get_form('similarity_object_edit', $similarity, $section, $plugin_id);
+  }
+}
+
+/**
+ * Return the html for the main section of the edit page for the 'add' action.
+ *
+ * @param $js
+ *   Boolean on whether or not to return ajax commands.
+ * @param Similarity $similarity
+ *   The Similarity being edited.
+ * @param $section
+ *   The section of the similarity object being edited.
+ *
+ * @return string
+ *   HTML to be render in the main section.
+ */
+function similarity_edit_main_section_add($section) {
+}
+
+/**
+ * Return the html for the main section of the edit page for the 'remove' action.
+ *
+ * @param $js
+ *   Boolean on whether or not to return ajax commands.
+ * @param Similarity $similarity
+ *   The Similarity being edited.
+ * @param $section
+ *   The section of the similarity object being edited.
+ * @param $plugin_id
+ *   The id of the plugin being changed can be empty string.
+ *
+ * @return string
+ *   HTML to be render in the main section.
+ */
+function similarity_edit_main_section_remove($section, $plugin_id) {
 }

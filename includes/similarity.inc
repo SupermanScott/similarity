@@ -42,12 +42,12 @@ class Similarity {
       'base' => array('#default_value' => 'node'),
       'base_field' => array('#default_value' => 'nid'),
       'conditions' => array('#default_value' => array()),
-      'tokenizer' => array(
+      'tokenizers' => array(
         'plugin_id' => array('#default_value' => ''),
         'options' => array('#default_value' => array()),
       ),
       'transformers' => array('#default_value' => array()),
-      'algorithm' => array(
+      'algorithms' => array(
         'plugin_id' => array('#default_value' => 'similarity_cosine'),
         'options' => array(
           '#default_value' => array(),
@@ -59,7 +59,7 @@ class Similarity {
   /**
    * Present the configurable options.
    */
-  public function optionForm(&$form, $form_state) {
+  public function optionForm($form_state) {
     $form['title'] = array(
       '#type' => 'textfield',
       '#title' => t('Name'),
@@ -75,6 +75,8 @@ class Similarity {
       '#description' => t('Only store similarities greater then this number. This means that if a node is similar to another node to the 50%, it will only be stored if this value is 50 or greater'),
       '#default_value' => $this->options['min_sim'],
     );
+
+		return $form;
   }
 
   /**
@@ -93,9 +95,9 @@ class Similarity {
     if (!empty($cached_data)) {
       return $cached_data->data;
     }
-    $tokenizer_function = ctools_plugin_load_function('similarity', 'tokenizers', $this->options['tokenizer']['plugin_id'], 'callback');
+    $tokenizer_function = ctools_plugin_load_function('similarity', 'tokenizers', $this->options['tokenizers']['plugin_id'], 'callback');
 
-    $tokens = $tokenizer_function($object_id, $this->options['tokenizer']['options'], $this->options['base']);
+    $tokens = $tokenizer_function($object_id, $this->options['tokenizers']['options'], $this->options['base']);
     foreach ($this->options['transformers'] as $transformer_definition) {
       $transformer = ctools_plugin_load_function('similarity', 'transformers', $transformer_definition['plugin_id'], 'callback');
       if ($transformer) {
@@ -118,7 +120,7 @@ class Similarity {
    */
   public function calculate($object_id, $object_set) {
     $base_tokens = $this->tokenize($object_id);
-    $algorithm = ctools_plugin_load_function('similarity', 'algorithms', $this->options['algorithm']['plugin_id'], 'callback');
+    $algorithm = ctools_plugin_load_function('similarity', 'algorithms', $this->options['algorithms']['plugin_id'], 'callback');
 
     foreach ($object_set as $other_id) {
       if ($other_id >= $object_id) {
@@ -129,7 +131,7 @@ class Similarity {
       }
 
       $other_tokens = $this->tokenize($other_id);
-      $similarity = $algorithm($base_tokens, $other_tokens, $this->options['algorithm']['options']);
+      $similarity = $algorithm($base_tokens, $other_tokens, $this->options['algorithms']['options']);
       if ($similarity >= $this->options['min_sim']) {
         $this->saveSimilarity($object_id, $other_id, $similarity);
       }
