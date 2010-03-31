@@ -15,3 +15,37 @@
 .similarity-admin-links ul.links li.last:after {
   content: '';
 }
+
+.similarity-left-column {
+  float: left;
+  width: 25%;
+  border-right: 1px solid #D3E7F4;
+}
+
+.similarity-main-section {
+  float: left;
+  width: 74%;
+}
+
+.similarity-edit-container,
+.similarity-main-content {
+  padding: 10px 10px 0;
+}
+
+.similarity-edit-container ul.links li {
+  padding: 0;
+}
+
+.similarity-edit-container h4,
+.similarity-edit-container .similarity-container-links {
+  display: inline;
+}
+
+.similarity-edit-container .similarity-container-links {
+  float: right;
+}
+
+.similarity-container-item-value {
+  display: inline;
+  float: right;
+}

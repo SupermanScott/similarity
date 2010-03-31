@@ -117,6 +117,15 @@ function similarity_menu() {
       'access callback' => 'similarity_delete_access',
       'access arguments' => array(4),
     ),
+    'admin/build/similarity/edit/%similarity' => array(
+      'title callback' => 'similarity_admin_title',
+      'title arguments' => array('edit', 4),
+      'page callback' => 'similarity_settings_page',
+      'page arguments' => array(4),
+      'file' => 'similarity.pages.inc',
+      'access callback' => 'user_access',
+      'access arguments' => array('administer similarity'),
+    ),
   );
 }
 
@@ -320,6 +329,10 @@ function similarity_theme() {
   return array(
     'similarity_object_overview' => array(
       'arguments' => array('element' => NULL),
+      'file' => 'theme/theme.inc',
+    ),
+    'similarity_edit_container' => array(
+      'arguments' => array('container' => NULL),
       'file' => 'theme/theme.inc',
     ),
   );

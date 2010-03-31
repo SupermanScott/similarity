@@ -18,7 +18,7 @@ class Similarity {
   public $machine_name;
 
   // The configuration options are stored in here.
-  protected $options = array();
+  public $options = array();
 
   // Candidates for the calculations.
   protected $candidates = NULL;
