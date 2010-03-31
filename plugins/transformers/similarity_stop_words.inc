@@ -7,10 +7,10 @@
 $plugin = array(
   'title' => t('Stop Words'),
   'callback' => 'similarity_transformer_stop_words',
-  'options' => array(
-    'form_id' => 'similarity_stop_words_form',
-    'definition' => array(
-      'stop_words' => array(
+  'form_callback' => 'similarity_transformer_stop_words_form',
+  'option_definition' => array(
+    'stop_words' => array(
+      '#default_value' => array(
         'a',
         'able',
         'about',
@@ -693,4 +693,26 @@ function similarity_transformer_stop_words($tokens, $options) {
     }
   }
   return $tokens;
+}
+
+/**
+ * FAPI form for configuring stop words transformer.
+ */
+function similarity_transformer_stop_words_form($form_state, $options) {
+  return array(
+    'stop_words' => array(
+      '#title' => t('Stop Words'),
+      '#type' => 'textarea',
+      '#default_value' => implode("\n", $options['stop_words']),
+      '#element_validate' => array('similarity_transformer_stop_words_explode'),
+      '#description' => t('Enter the stop words on each new line'),
+    ),
+  );
+}
+
+/**
+ * Element validate on the stop words textarea.
+ */
+function similarity_transformer_stop_words_explode($element, &$form_state) {
+  form_set_value($element, explode("\n", $element['#value']), $form_state);
 }

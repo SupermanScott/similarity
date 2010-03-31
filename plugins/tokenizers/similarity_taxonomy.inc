@@ -7,14 +7,12 @@
 $plugin = array(
   'title' => t('Taxonomy'),
   'callback' => 'similarity_tokenizer_taxonomy',
-  'options' => array(
-    'form_id' => 'similarity_tokenizer_taxonomy_form',
-    'definition' => array(
-      'vid' => array(
-        '#default_value' => 0,
-      ),
+  'option_definition' => array(
+    'vid' => array(
+      '#default_value' => 0,
     ),
   ),
+  'form_callback' => 'similarity_tokenizer_taxonomy_form',
   'base' => array('node'),
 );
 
@@ -62,4 +60,23 @@ function similarity_tokenizer_taxonomy($nid, $options) {
   }
 
   return $tokens;
+}
+
+/**
+ * FAPI configuration form for the taxonomy tokenizer.
+ */
+function similarity_tokenizer_taxonomy_form($form_state, $options) {
+  foreach(taxonomy_get_vocabularies() as $vid => $vocab) {
+    $possible[$vid] = $vocab->name;
+  }
+
+  return array(
+    'vid' => array(
+      '#type' => 'checkboxes',
+      '#title' => t('Vocabularies'),
+      '#options' => $possible,
+      '#default_value' => !empty($options['vid']) ? $options['vid'] : NULL,
+    ),
+  );
+  
 }

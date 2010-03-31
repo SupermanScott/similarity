@@ -7,8 +7,7 @@
 $plugin = array(
   'title' => t('Search Index'),
   'callback' => 'similarity_tokenizer_search_index',
-  'options' => array(
-    'definition' => array(),
+  'option_definition' => array(
   ),
   'base' => array('node'),
 );
@@ -22,6 +21,7 @@ $plugin = array(
  *   The options for this tokenization.
  * @param $base
  *   The base table for this tokenization.
+ *
  * @return array
  *   a word => relevancy array for all words in the search index for this node.
  */

@@ -97,7 +97,6 @@ function similarity_add_plugin($form_state, $similarity, $category) {
   foreach ($plugins as $plugin_id => $plugin) {
     $options[$plugin_id] = $plugin['title'];
   }
-
   return array(
     $category => array(
       '#title' => t(drupal_ucfirst($category)),
@@ -120,7 +119,7 @@ function similarity_add_plugin_transformers_submit($form, &$form_state) {
   $plugin = ctools_get_plugins('similarity', 'transformers', $form_state['values']['transformers']);
   $form['#similarity']->options['transformers'][] = array(
     'plugin_id' => $form_state['values']['transformers'],
-    'options' => similarity_compress_option_definition($plugin['options']['definition']),
+    'options' => similarity_compress_option_definition($plugin['option_definition']),
   );
 
 
@@ -135,7 +134,7 @@ function similarity_add_plugin_conditions_submit($form, &$form_state) {
   $plugin = ctools_get_plugins('similarity', 'conditions', $form_state['values']['conditions']);
   $form['#similarity']->options['conditions'][] = array(
     'plugin_id' => $form_state['values']['conditions'],
-    'options' => similarity_compress_option_definition($plugin['options']['definition']),
+    'options' => similarity_compress_option_definition($plugin['option_definition']),
   );
 
 
@@ -150,7 +149,7 @@ function similarity_add_plugin_tokenizers_submit($form, &$form_state) {
   $plugin = ctools_get_plugins('similarity', 'tokenizers', $form_state['values']['tokenizers']);
   $form['#similarity']->options['tokenizers'] = array(
     'plugin_id' => $form_state['values']['tokenizers'],
-    'options' => similarity_compress_option_definition($plugin['options']['definition']),
+    'options' => similarity_compress_option_definition($plugin['option_definition']),
   );
 
 
@@ -166,8 +165,10 @@ function similarity_object_edit($form_state, $similarity, $category, $plugin_id)
     $form['options'] = $similarity->optionForm($form_state);
   }
   else {
-    $plugin_def = ctools_get_plugins('similarity', $category, $plugin_id);
-    $form['options'] = $plugin_def['options']['form_id']($form_state, similarity_find_options($similarity->options, $category, $plugin_id));
+    $function = ctools_plugin_load_function('similarity', $category, $plugin_id, 'form_callback');
+    if ($function) {
+      $form['options'] = $function($form_state, similarity_find_options($similarity->options, $category, $plugin_id));
+    }
   }
 
   $form['options']['#tree'] = TRUE;
@@ -193,9 +194,11 @@ function similarity_object_edit($form_state, $similarity, $category, $plugin_id)
  * FAPI Submit callback.
  */
 function similarity_object_edit_submit_conditions($form, &$form_state) {
-  foreach ($form['#similarity']->options['conditions'] as $key => $plugin_info) {
-    if ($plugin_info['plugin_id'] == $form['#plugin_id']) {
-      $form['#similarity']->options['conditions'][$key]['options'] = $form_state['values']['options'];
+  if (isset($form_state['values']['options'])) {
+    foreach ($form['#similarity']->options['conditions'] as $key => $plugin_info) {
+      if ($plugin_info['plugin_id'] == $form['#plugin_id']) {
+        $form['#similarity']->options['conditions'][$key]['options'] = $form_state['values']['options'];
+      }
     }
   }
   similarity_save($form['#similarity']);
@@ -205,9 +208,11 @@ function similarity_object_edit_submit_conditions($form, &$form_state) {
  * FAPI Submit callback.
  */
 function similarity_object_edit_submit_transformers($form, &$form_state) {
-  foreach ($form['#similarity']->options['transformers'] as $key => $plugin_info) {
-    if ($plugin_info['plugin_id'] == $form['#plugin_id']) {
-      $form['#similarity']->options['transformers'][$key]['options'] = $form_state['values']['options'];
+  if (isset($form_state['values']['options'])) {
+    foreach ($form['#similarity']->options['transformers'] as $key => $plugin_info) {
+      if ($plugin_info['plugin_id'] == $form['#plugin_id']) {
+        $form['#similarity']->options['transformers'][$key]['options'] = $form_state['values']['options'];
+      }
     }
   }
   similarity_save($form['#similarity']);
@@ -217,7 +222,9 @@ function similarity_object_edit_submit_transformers($form, &$form_state) {
  * FAPI Submit callback.
  */
 function similarity_object_edit_submit_tokenizers($form, &$form_state) {
-  $form['#similarity']->options[$form['#category']]['options'] = $form_state['values']['options'];
+  if (isset($form_state['values']['options'])) {
+    $form['#similarity']->options[$form['#category']]['options'] = $form_state['values']['options'];
+  }
   similarity_save($form['#similarity']);
 }
 
@@ -225,7 +232,9 @@ function similarity_object_edit_submit_tokenizers($form, &$form_state) {
  * FAPI Submit callback.
  */
 function similarity_object_edit_submit_basics($form, &$form_state) {
-  $form['#similarity']->options = array_merge($form['#similarity']->options, $form_state['values']['options']);
+  if (isset($form_state['values']['options'])) {
+    $form['#similarity']->options = array_merge($form['#similarity']->options, $form_state['values']['options']);
+  }
   similarity_save($form['#similarity']);
 }
 

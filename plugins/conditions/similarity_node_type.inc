@@ -7,10 +7,12 @@
 $plugin = array(
   'title' => t('Node type'),
   'callback' => 'similarity_condition_node_type',
-  'options' => array(
-    'form_id' => 'similarity_condition_node_type_form',
-    'definition' => array(),
+  'option_definition' => array(
+    'types' => array(
+      '#default_value' => array('page', 'story'),
+    ),
   ),
+  'form_callback' => 'similarity_condition_node_type_form',
   'base' => array('node'),
 );
 
