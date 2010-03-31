@@ -36,21 +36,6 @@ function similarity_calculate_work($job_info) {
 }
 
 /**
- * Implementation of hook_cron().
- */
-function similarity_cron() {
-  $queue = drupal_queue_get('similarity_calculate');
-
-  foreach (similarity_all_objects() as $sim) {
-    foreach($sim->findCandidates() as $id) {
-      if ($queue->createItem(array('machine_name' => $sim->machine_name, 'id' => $id)) == FALSE) {
-        // DOH!
-      }
-    }
-  }
-}
-
-/**
  * Implementation of hook_ctools_plugin_api().
  */
 function similarity_ctools_plugin_api($module, $api) {
