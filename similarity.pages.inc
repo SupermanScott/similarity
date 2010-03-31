@@ -140,7 +140,7 @@ function similarity_add_plugin_conditions_submit($form, &$form_state) {
 
 
   similarity_save($form['#similarity']);
-$form_state['redirect'] = 'admin/build/similarity/edit/' . $form['#similarity']->machine_name . '/nojs/edit/conditions/' .  $form_state['values']['conditions'];
+  $form_state['redirect'] = 'admin/build/similarity/edit/' . $form['#similarity']->machine_name . '/nojs/edit/conditions/' .  $form_state['values']['conditions'];
 }
 
 /**
