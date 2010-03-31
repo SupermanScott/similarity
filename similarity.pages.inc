@@ -90,6 +90,75 @@ function similarity_find_options($options, $plugin_type, $plugin_id) {
 }
 
 /**
+ * Add a plugin form
+ */
+function similarity_add_plugin($form_state, $similarity, $category) {
+  $plugins = ctools_get_plugins('similarity', $category);
+  foreach ($plugins as $plugin_id => $plugin) {
+    $options[$plugin_id] = $plugin['title'];
+  }
+
+  return array(
+    $category => array(
+      '#title' => t(drupal_ucfirst($category)),
+      '#type' => 'select',
+      '#options' => $options,
+    ),
+    'add' => array(
+      '#type' => 'submit',
+      '#value' => t('Add'),
+    ),
+    '#similarity' => $similarity,
+    '#submit' => array('similarity_add_plugin_' . $category . '_submit'),
+  );
+}
+
+/**
+ * Form submit callback.
+ */
+function similarity_add_plugin_transformers_submit($form, &$form_state) {
+  $plugin = ctools_get_plugins('similarity', 'transformers', $form_state['values']['transformers']);
+  $form['#similarity']->options['transformers'][] = array(
+    'plugin_id' => $form_state['values']['transformers'],
+    'options' => similarity_compress_option_definition($plugin['options']['definition']),
+  );
+
+
+  similarity_save($form['#similarity']);
+  $form_state['redirect'] = 'admin/build/similarity/edit/' . $form['#similarity']->machine_name . '/nojs/edit/transformers/' .  $form_state['values']['transformers'];
+}
+
+/**
+ * Form submit callback.
+ */
+function similarity_add_plugin_conditions_submit($form, &$form_state) {
+  $plugin = ctools_get_plugins('similarity', 'conditions', $form_state['values']['conditions']);
+  $form['#similarity']->options['conditions'][] = array(
+    'plugin_id' => $form_state['values']['conditions'],
+    'options' => similarity_compress_option_definition($plugin['options']['definition']),
+  );
+
+
+  similarity_save($form['#similarity']);
+$form_state['redirect'] = 'admin/build/similarity/edit/' . $form['#similarity']->machine_name . '/nojs/edit/conditions/' .  $form_state['values']['conditions'];
+}
+
+/**
+ * Form submit callback.
+ */
+function similarity_add_plugin_tokenizers_submit($form, &$form_state) {
+  $plugin = ctools_get_plugins('similarity', 'tokenizers', $form_state['values']['tokenizers']);
+  $form['#similarity']->options['tokenizers'] = array(
+    'plugin_id' => $form_state['values']['tokenizers'],
+    'options' => similarity_compress_option_definition($plugin['options']['definition']),
+  );
+
+
+  similarity_save($form['#similarity']);
+  $form_state['redirect'] = 'admin/build/similarity/edit/' . $form['#similarity']->machine_name . '/nojs/edit/tokenizers/' .  $form_state['values']['tokenizers'];
+}
+
+/**
  * Edit Similarity form
  */
 function similarity_object_edit($form_state, $similarity, $category, $plugin_id) {
@@ -380,7 +449,13 @@ function similarity_edit_main_section_edit($js, Similarity $similarity, $section
  * @return string
  *   HTML to be render in the main section.
  */
-function similarity_edit_main_section_add($section) {
+function similarity_edit_main_section_add($js, $similarity, $section) {
+  if ($js) {
+    // CTools commands here.
+  }
+  else {
+    return drupal_get_form('similarity_add_plugin', $similarity, $section);
+  }
 }
 
 /**
@@ -398,5 +473,23 @@ function similarity_edit_main_section_add($section) {
  * @return string
  *   HTML to be render in the main section.
  */
-function similarity_edit_main_section_remove($section, $plugin_id) {
+function similarity_edit_main_section_remove($js, Similarity $similarity, $section, $plugin_id) {
+  if ($js) {
+    // CTools commands here.
+  }
+  else {
+    if (in_array($section, array('conditions', 'transformers'))) {
+      foreach ($similarity->options[$section] as $key => $plugin_info) {
+        if ($plugin_info['plugin_id'] == $plugin_id) {
+          unset($similarity->options[$section][$key]);
+          break;
+        }
+      }
+    }
+    elseif ($section == 'tokenizers') {
+      unset($similarity->options['tokenizer']);
+    }
+    similarity_save($similarity);
+    drupal_goto('admin/build/similarity/edit/' . $similarity->machine_name);
+  }
 }
