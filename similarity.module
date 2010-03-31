@@ -335,8 +335,8 @@ function similarity_compile_options($options, $default_options) {
  */
 function similarity_save(Similarity $similarity) {
   $result = drupal_write_record('similarity_objects', $similarity, 'machine_name');
-  if (empty($result)) {
-    drupal_write_record('similarity_objects', $form['#similarity']);
+  if (!db_affected_rows()) {
+    drupal_write_record('similarity_objects', $similarity);
   }
 }
 
