@@ -39,7 +39,6 @@ class Similarity {
       'title' => array('#default_value' => ''),
       'description' => array('#default_value' => ''),
       'min_sim' => array('#default_value' => 0.50),
-      'time_limit' => array('#default_value' => 15),
       'base' => array('#default_value' => 'node'),
       'base_field' => array('#default_value' => 'nid'),
       'conditions' => array('#default_value' => array()),
@@ -75,12 +74,6 @@ class Similarity {
       '#options' => drupal_map_assoc(range(50, 100, 5)),
       '#description' => t('Only store similarities greater then this number. This means that if a node is similar to another node to the 50%, it will only be stored if this value is 50 or greater'),
       '#default_value' => $this->options['min_sim'],
-    );
-    $form['time_limit'] = array(
-      '#type' => 'select',
-      '#title' => t('Cron time limit'),
-      '#description' => t('Number of seconds this object is allowed to do its own processing'),
-      '#default_value' => $this->options['time_limit']
     );
   }
 
