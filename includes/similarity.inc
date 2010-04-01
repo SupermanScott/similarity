@@ -79,7 +79,7 @@ class Similarity {
       '#default_value' => $this->options['min_sim'],
     );
 
-		return $form;
+    return $form;
   }
 
   /**
