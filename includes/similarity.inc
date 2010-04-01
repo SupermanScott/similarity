@@ -65,6 +65,12 @@ class Similarity {
       '#default_value' => $this->options['title'],
       '#size' => 40,
     );
+    $form['description'] = array(
+      '#type' => 'textarea',
+      '#title' => t('Description'),
+      '#description' => t('Description about what this similarity does.'),
+      '#default_value' => $this->options['description'],
+    );
     $form['min_sim'] = array(
       '#type' => 'select',
       '#title' => t('Minimum similarity score'),

@@ -174,6 +174,11 @@ function similarity_add_object_form($form_state) {
       '#required' => TRUE,
       '#description' => t('This is the name of the similarity object and is shown only on administration pages.'),
     ),
+    'description' => array(
+      '#title' => t('Description'),
+      '#type' => 'textarea',
+      '#description' => t('A description of what this similarity object does.'),
+    ),
     'create' => array(
       '#type' => 'submit',
       '#value' => t('Create'),
@@ -189,6 +194,7 @@ function similarity_add_object_form_submit($form, &$form_state) {
   $basic_obj->machine_name = $form_state['values']['machine_name'];
   $basic_obj->options = array();
   $basic_obj->options['title'] = $form_state['values']['title'];
+  $basic_obj->options['description'] = $form_state['values']['description'];
 
   $sim = similarity_create($basic_obj);
   similarity_save($sim);
