@@ -110,6 +110,20 @@ function similarity_menu() {
       'file' => 'similarity.pages.inc',
       'access arguments' => array('administer similarity'),
     ),
+    'admin/build/similarity/list' => array(
+      'title' => t('List'),
+      'type' => MENU_DEFAULT_LOCAL_TASK,
+      'weight' => 0,
+    ),
+    'admin/build/similarity/add' => array(
+      'title' => t('Add'),
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('similarity_add_object_form'),
+      'file' => 'similarity.pages.inc',
+      'access arguments' => array('administer similarity'),
+      'type' => MENU_LOCAL_TASK,
+      'weight' => -1,
+    ),
     'admin/build/similarity/delete/%similarity' => array(
       'title callback' => 'similarity_admin_title',
       'title arguments' => array('delete', 4),

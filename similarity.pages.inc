@@ -75,7 +75,6 @@ function similarity_object_delete_submit($form, &$form_state) {
 
 /**
  * Find the options for a plugin.
- *
  */
 function similarity_find_options($options, $plugin_type, $plugin_id) {
   if (in_array($plugin_type, array('conditions', 'transformers', 'tokenizers'))) {
@@ -155,6 +154,46 @@ function similarity_add_plugin_tokenizers_submit($form, &$form_state) {
 
   similarity_save($form['#similarity']);
   $form_state['redirect'] = 'admin/build/similarity/edit/' . $form['#similarity']->machine_name . '/nojs/edit/tokenizers/' .  $form_state['values']['tokenizers'];
+}
+
+/**
+ * Add a similarity form.
+ */
+function similarity_add_object_form($form_state) {
+  return array(
+    'machine_name' => array(
+      '#title' => t('Machine Name'),
+      '#type' => 'textfield',
+      '#required' => TRUE,
+      '#description' => t('This is the unique name of the similarity objects. It must contain only alphanumeric characters and underscores; it is used to identify the similarity object internally.'),
+      '#element_validate' => array(/* Element validate here */),
+    ),
+    'title' => array(
+      '#title' => t('Name'),
+      '#type' => 'textfield',
+      '#required' => TRUE,
+      '#description' => t('This is the name of the similarity object and is shown only on administration pages.'),
+    ),
+    'create' => array(
+      '#type' => 'submit',
+      '#value' => t('Create'),
+    ),
+  );
+}
+
+/**
+ * Form submit for adding a similarity.
+ */
+function similarity_add_object_form_submit($form, &$form_state) {
+  $basic_obj = new stdClass();
+  $basic_obj->machine_name = $form_state['values']['machine_name'];
+  $basic_obj->options = array();
+  $basic_obj->options['title'] = $form_state['values']['title'];
+
+  $sim = similarity_create($basic_obj);
+  similarity_save($sim);
+
+  $form_state['redirect'] = 'admin/build/similarity/edit/' . $sim->machine_name;
 }
 
 /**
