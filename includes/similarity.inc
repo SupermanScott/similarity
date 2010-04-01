@@ -42,10 +42,7 @@ class Similarity {
       'base' => array('#default_value' => 'node'),
       'base_field' => array('#default_value' => 'nid'),
       'conditions' => array('#default_value' => array()),
-      'tokenizers' => array(
-        'plugin_id' => array('#default_value' => ''),
-        'options' => array('#default_value' => array()),
-      ),
+      'tokenizers' => array('#default_value' => array()),
       'transformers' => array('#default_value' => array()),
       'algorithms' => array(
         'plugin_id' => array('#default_value' => 'similarity_cosine'),
@@ -95,12 +92,20 @@ class Similarity {
     if (!empty($cached_data)) {
       return $cached_data->data;
     }
-    $tokenizer_function = ctools_plugin_load_function('similarity', 'tokenizers', $this->options['tokenizers']['plugin_id'], 'callback');
 
-    $tokens = $tokenizer_function($object_id, $this->options['tokenizers']['options'], $this->options['base']);
+    foreach ($this->options['tokenizers'] as $tokenizer_definition) {
+      $tokenizer_function = ctools_plugin_load_function('similarity', 'tokenizers', $tokenizer_definition['plugin_id'], 'callback');
+      if (!empty($tokenizer_function)) {
+        // Tokens can be overridden in the case that both tokenizers return the
+        // same words, the last one will win out.
+        $tokens = array_merge($tokens, $tokenizer_function($object_id, $tokenizer_definition['options'], $this->options['base']));
+      }
+    }
+
     foreach ($this->options['transformers'] as $transformer_definition) {
       $transformer = ctools_plugin_load_function('similarity', 'transformers', $transformer_definition['plugin_id'], 'callback');
       if ($transformer) {
+        // Transformers turn the tokens from the tokenizers into something else.
         $tokens = $transformer($tokens, $transformer_definition['options']);
       }
     }

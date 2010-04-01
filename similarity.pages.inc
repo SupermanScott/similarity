@@ -78,7 +78,7 @@ function similarity_object_delete_submit($form, &$form_state) {
  *
  */
 function similarity_find_options($options, $plugin_type, $plugin_id) {
-  if (in_array($plugin_type, array('conditions', 'transformers'))) {
+  if (in_array($plugin_type, array('conditions', 'transformers', 'tokenizers'))) {
     foreach ($options[$plugin_type] as $plugin_info) {
       if ($plugin_info['plugin_id'] == $plugin_id) {
         return $plugin_info['options'];
@@ -147,7 +147,7 @@ function similarity_add_plugin_conditions_submit($form, &$form_state) {
  */
 function similarity_add_plugin_tokenizers_submit($form, &$form_state) {
   $plugin = ctools_get_plugins('similarity', 'tokenizers', $form_state['values']['tokenizers']);
-  $form['#similarity']->options['tokenizers'] = array(
+  $form['#similarity']->options['tokenizers'][] = array(
     'plugin_id' => $form_state['values']['tokenizers'],
     'options' => similarity_compress_option_definition($plugin['option_definition']),
   );
@@ -223,7 +223,11 @@ function similarity_object_edit_submit_transformers($form, &$form_state) {
  */
 function similarity_object_edit_submit_tokenizers($form, &$form_state) {
   if (isset($form_state['values']['options'])) {
-    $form['#similarity']->options[$form['#category']]['options'] = $form_state['values']['options'];
+    foreach ($form['#similarity']->options['tokenizers'] as $key => $plugin_info) {
+      if ($plugin_info['plugin_id'] == $form['#plugin_id']) {
+        $form['#similarity']->options['tokenizers'][$key]['options'] = $form_state['values']['options'];
+      }
+    }
   }
   similarity_save($form['#similarity']);
 }
@@ -323,28 +327,48 @@ function similarity_settings_page(Similarity $similarity, $js = FALSE, $action =
     );
   }
 
-  $tokenizer_plugin = ctools_get_plugins('similarity', 'tokenizers', $similarity->options['tokenizers']['plugin_id']);
-  $tokenizer_item = array(
-    '#title' => $tokenizer_plugin['title'],
-    '#value' => theme('links', array('edit' => array('title' => t('Edit'), 'href' => 'admin/build/similarity/edit/' . $similarity->machine_name . '/nojs/edit/tokenizers/' . $similarity->options['tokenizers']['plugin_id'], 'attributes' => array('class' => 'ctools-use-ajax')),)));
-
-  $tokenizer = array(
-    '#title' => t('Tokenizer'),
+  $tokenizers = array(
+    '#title' => t('Tokenizers'),
     '#links' => array(
-      'change' => array(
-        'title' => t('Change'),
+      'add' => array(
+        'title' => t('Add'),
         'href' => 'admin/build/similarity/edit/' . $similarity->machine_name . '/nojs/add/tokenizers',
         'attributes' => array(
           'class' => 'ctools-use-ajax',
         ),
       ),
     ),
-    $similarity->options['tokenizers']['plugin_id'] => $tokenizer_item,
-    '#theme' => array('similarity_edit_container__tokenizer', 'similarity_edit_container'),
+    '#theme' => array('similarity_edit_container__tokenizers', 'similarity_edit_container'),
     '#attributes' => array(
-      'class' => 'similarity-container-tokenizer',
+      'class' => 'similarity-container-tokenizers',
     ),
   );
+
+  foreach ($similarity->options['tokenizers'] as $plugin_def) {
+    $plugin = ctools_get_plugins('similarity', 'tokenizers', $plugin_def['plugin_id']);
+    $edit_remove = array(
+      'edit' => array(
+        'title' => t('Edit'),
+        'href' => 'admin/build/similarity/edit/' . $similarity->machine_name . '/nojs/edit/tokenizers/' . $plugin_def['plugin_id'],
+        'attributes' => array(
+          'class' => 'ctools-use-ajax',
+        ),
+      ),
+      'remove' => array(
+        'title' => t('Remove'),
+        'href' => 'admin/build/similarity/edit/' . $similarity->machine_name . '/nojs/remove/tokenizers/' . $plugin_def['plugin_id'],
+        'attributes' => array(
+          'class' => 'ctools-use-ajax',
+        ),
+      ),
+    );
+
+    $tokenizers[$plugin_def['plugin_id']] = array(
+      '#type' => 'item',
+      '#title' => $plugin['title'],
+      '#value' => theme('links', $edit_remove, array('class' => 'links similarity-plugin-links')),
+    );
+  }
 
   $transformers = array(
     '#title' => t('Transformers'),
@@ -396,7 +420,7 @@ function similarity_settings_page(Similarity $similarity, $js = FALSE, $action =
     '<div class="similarity-left-column">' .
     drupal_render($basics) .
     drupal_render($conditions) .
-    drupal_render($tokenizer) .
+    drupal_render($tokenizers) .
     drupal_render($transformers) .
     '</div>' .
     $main_section .
@@ -487,16 +511,13 @@ function similarity_edit_main_section_remove($js, Similarity $similarity, $secti
     // CTools commands here.
   }
   else {
-    if (in_array($section, array('conditions', 'transformers'))) {
+    if (in_array($section, array('conditions', 'transformers', 'tokenizers'))) {
       foreach ($similarity->options[$section] as $key => $plugin_info) {
         if ($plugin_info['plugin_id'] == $plugin_id) {
           unset($similarity->options[$section][$key]);
           break;
         }
       }
-    }
-    elseif ($section == 'tokenizers') {
-      unset($similarity->options['tokenizer']);
     }
     similarity_save($similarity);
     drupal_goto('admin/build/similarity/edit/' . $similarity->machine_name);
