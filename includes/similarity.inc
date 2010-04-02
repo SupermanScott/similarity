@@ -76,7 +76,8 @@ class Similarity {
       '#title' => t('Minimum similarity score'),
       '#options' => drupal_map_assoc(range(50, 100, 5)),
       '#description' => t('Only store similarities greater then this number. This means that if a node is similar to another node to the 50%, it will only be stored if this value is 50 or greater'),
-      '#default_value' => $this->options['min_sim'],
+      '#default_value' => $this->options['min_sim'] * 100,
+      '#element_validate' => array('similarity_validate_min_sim'),
     );
 
     return $form;
@@ -339,4 +340,11 @@ class Similarity {
     }
     return NULL;
   }
+}
+
+/**
+ * Element validation for the min sim form item.
+ */
+function similarity_validate_min_sim($element, &$form_state) {
+  form_set_value($element, $element['#value'] / 100, $form_state);
 }
