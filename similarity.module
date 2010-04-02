@@ -45,6 +45,16 @@ function similarity_ctools_plugin_api($module, $api) {
 }
 
 /**
+ * Implementation of hook_views_api().
+ */
+function similarity_views_api() {
+  return array(
+    'path' => drupal_get_path('module', 'similarity') . '/views',
+    'api' => 2.0,
+  );
+}
+
+/**
  * Implementation of hook_similarity_objects_default().
  */
 function similarity_similarity_objects_default($export_defintion) {
@@ -236,7 +246,7 @@ function similarity_create($ctools_object) {
 /**
  * Implementation of hook_nodeapi().
  */
-function simliarity_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
+function similarity_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
   if ($op == 'insert') {
     similarity_node_insert($node);
   }
@@ -250,7 +260,6 @@ function simliarity_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
  */
 function similarity_node_insert($node) {
   $queue = drupal_queue_get('similarity_calculate');
-
   foreach (similarity_all_objects() as $sim) {
     $sim->resetCandidates();
     $canidates = $sim->findCandidates();

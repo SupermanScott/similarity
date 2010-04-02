@@ -168,19 +168,14 @@ class Similarity {
       db_create_table($ret, 'similarity_' . $this->machine_name, $this->schema());
     }
 
-    // Store nid1 as the smallest id.
-    if ($object_id1 < $object_id2) {
-      $nid1 = $object_id1;
-      $nid2 = $object_id2;
-    }
-    else {
-      $nid1 = $object_id2;
-      $nid2 = $object_id1;
+    db_query('UPDATE {similarity_' . $this->machine_name . '} SET score = %f, created = %d WHERE nid1 = %d AND nid2 = %d', $similarity, time(), $object_id1, $object_id2);
+    if (!db_affected_rows()) {
+      db_query('INSERT INTO {similarity_' . $this->machine_name . '} (score, created, nid1, nid2) VALUE (%f, %d, %d, %d)', $similarity, time(), $object_id1, $object_id2);
     }
 
-    db_query('UPDATE {similarity_' . $this->machine_name . '} SET score = %f, created = %d WHERE nid1 = %d AND nid2 = %d', $similarity, time(), $nid1, $nid2);
+    db_query('UPDATE {similarity_' . $this->machine_name . '} SET score = %f, created = %d WHERE nid1 = %d AND nid2 = %d', $similarity, time(), $object_id2, $object_id1);
     if (!db_affected_rows()) {
-      db_query('INSERT INTO {similarity_' . $this->machine_name . '} (score, created, nid1, nid2) VALUE (%f, %d, %d, %d)', $similarity, time(), $nid1, $nid2);
+      db_query('INSERT INTO {similarity_' . $this->machine_name . '} (score, created, nid1, nid2) VALUE (%f, %d, %d, %d)', $similarity, time(), $object_id2, $object_id1);
     }
   }
 
@@ -289,29 +284,21 @@ class Similarity {
   /**
    * Provide the Views data for this similarity.
    */
-  protected function views_data() {
-    $table_name = $this->machine_name . '_similarity';
+  public function viewsData() {
+    $table_name = 'similarity_' . $this->machine_name;
     
     $data[$table_name]['table']['group'] = t('Similarity');
     $data[$table_name]['table']['join'] = array(
       'node' => array(
         'left_field' => 'nid',
         'field' => 'nid1',
-        'type' => 'LEFT',
+        'type' => 'INNER',
       ),
     );
-     $data[$table_name . "_reverse"]['table']['group'] = t('Similarity');
-    $data[$table_name . "_reverse"]['table']['join'] = array(
-      'node' => array(
-        'left_field' => 'nid',
-        'field' => 'nid2',
-        'type' => 'LEFT',
-      ),
-    );
-    $data[$table_name]['nid1'] = array(
+    $data[$table_name]['nid2'] = array(
       'title' => t('@name Similary NID', array('@name' => $this->title)),
       'argument' => array(
-        'handler' => 'similarity_views_argument_nid',
+        'handler' => 'views_handler_argument_node_nid',
       ),
       'help' => t('Node id of the similar node'),
     );
@@ -319,7 +306,7 @@ class Similarity {
     $data[$table_name]['score'] = array(
       'title' => t('@name Similarity score', array('@name' => $this->title)),
       'field' => array(
-        'handler' => 'similarity_views_handler_field_score', // TODO: write this handler
+        'handler' => 'views_handler_field_numeric', // TODO: write this handler
         'click sortable' => TRUE,
       ),
       'sort' => array(
