@@ -20,6 +20,9 @@ class Similarity {
   // The configuration options are stored in here.
   public $options = array();
 
+  // Whether or not this object resides in the object_cache.
+  public $from_cache = FALSE;
+
   // Candidates for the calculations.
   protected $candidates = NULL;
 

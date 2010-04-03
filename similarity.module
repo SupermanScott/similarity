@@ -178,7 +178,11 @@ function similarity_menu() {
  * Menu title callback.
  */
 function similarity_admin_title($op, $similarity_object) {
-  return t(drupal_ucfirst($op)) . ' ' . $similarity_object->title();
+  $edit = '';
+  if ($similarity_object->from_cache) {
+    $edit = '(' . t('Not Saved') . ')';
+  }
+  return t(drupal_ucfirst($op) . ' @title !edit', array('@title' => $similarity_object->title(), '!edit' => $edit));
 }
 
 /**
@@ -401,6 +405,7 @@ function similarity_cache_load($machine_name) {
  */
 function similarity_cache_save(Similarity $similarity) {
   ctools_include('object-cache');
+  $similarity->from_cache = TRUE;
   $cache = ctools_object_cache_set('similarity_objects', $similarity->machine_name, $similarity);
 }
 

@@ -81,6 +81,7 @@ function similarity_commit_form_submit($form, &$form_state) {
     similarity_save($form['#similarity']);
   }
   similarity_cache_remove($form['#similarity']);
+  drupal_set_message(t('All changes to @title have been committed', array('@title' => $form['#similarity']->title())));
 }
 
 /**
