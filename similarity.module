@@ -821,7 +821,7 @@ function similarity_menu() {
       'access arguments' => array('administer similarity'),
       'file' => 'similarity.pages.inc',
     ),
-    'admin/build/similarity/delete/%similarity' => array(
+    'admin/build/similarity/delete/%similarity_cache' => array(
       'title callback' => 'similarity_admin_title',
       'title arguments' => array('delete', 4),
       'page callback' => 'drupal_get_form',
@@ -866,7 +866,7 @@ function similarity_admin_title($op, $similarity_object) {
  * Access callback to delete a similarity.
  */
 function similarity_delete_access($similarity_object) {
-  return $similarity_object->export_type & EXPORT_IN_DATABASE && user_access('administer similarity');
+  return ($similarity_object->export_type & EXPORT_IN_DATABASE || $similarity_object->from_cache) && user_access('administer similarity');
 }
 
 /**
@@ -975,7 +975,6 @@ function similarity_node_update($node) {
  * Export a Similarity configuration to code.
  */
 function similarity_export(Similarity $similarity, $indent = '') {
-  dpm($similarity->exportObject());
   ctools_include('export');
   return ctools_export_object('similarity_objects', $similarity->exportObject(), $indent);
 }
@@ -1075,6 +1074,7 @@ function similarity_cache_load($machine_name) {
   ctools_include('object-cache');
   ctools_include('similarity', 'similarity');
   ctools_include('plugins');
+  ctools_include('export');
   $cache = ctools_object_cache_get('similarity_objects', $machine_name);
   if (!$cache) {
     $cache = similarity_load($machine_name);
