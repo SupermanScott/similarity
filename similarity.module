@@ -16,12 +16,14 @@
  * Implementation of hook_cron_queue_info().
  */
 function similarity_cron_queue_info() {
-  return array(
-    'similarity_calculate' => array(
+  $queues = array();
+  foreach (similarity_all_objects() as $similarity) {
+    $queues["similarity_calculate_{$similarity->machine_name}"] = array(
       'worker callback' => 'similarity_calculate_work',
-      'time' => variable_get('similarity_calculate_time', 15),
-    ),
-  );
+      'time' => $similarity->options['max_time'],
+    );
+  }
+  return $queues;
 }
 
 /**
@@ -273,8 +275,8 @@ function similarity_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
  * Implementation of hook_node_insert().
  */
 function similarity_node_insert($node) {
-  $queue = drupal_queue_get('similarity_calculate');
   foreach (similarity_all_objects() as $sim) {
+    $queue = drupal_queue_get("similarity_calculate_{$sim->machine_name}");
     $sim->resetCandidates();
     $canidates = $sim->findCandidates();
     if (in_array($node->nid, $canidates)) {
@@ -383,7 +385,10 @@ function similarity_save(Similarity $similarity) {
     cache_clear_all('*', $cache_table, TRUE);
   }
 
-  $queue = drupal_queue_get('similarity_calculate');
+  // Handle queued up items.
+  $queue = drupal_queue_get("similarity_calculate_{$similarity->machine_name}");
+  $queue->deleteQueue();
+
   // Queue up all objects for recalculation.
   foreach ($similarity->findCandidates() as $candiate) {
     $queue->createItem(array('machine_name' => $similarity->machine_name, 'id' => $candiate));

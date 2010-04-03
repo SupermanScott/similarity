@@ -42,6 +42,7 @@ class Similarity {
       'title' => array('#default_value' => ''),
       'description' => array('#default_value' => ''),
       'min_sim' => array('#default_value' => 0.50),
+      'max_time' => array('#default_value' => 15),
       'base' => array('#default_value' => 'node'),
       'base_field' => array('#default_value' => 'nid'),
       'conditions' => array('#default_value' => array()),
@@ -81,6 +82,13 @@ class Similarity {
       '#description' => t('Only store similarities greater then this number. This means that if a node is similar to another node to the 50%, it will only be stored if this value is 50 or greater'),
       '#default_value' => $this->options['min_sim'] * 100,
       '#element_validate' => array('similarity_validate_min_sim'),
+    );
+    $form['max_time'] = array(
+      '#type' => 'select',
+      '#title' => t('Maximum calculation time'),
+      '#description' => t('The maximum amount of time in seconds spent on Drupal cron run calculating similarities for this object.'),
+      '#options' => drupal_map_assoc(range(5, 60, 5)),
+      '#default_value' => $this->options['max_time'],
     );
 
     return $form;
