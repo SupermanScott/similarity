@@ -382,6 +382,12 @@ function similarity_save(Similarity $similarity) {
   foreach (similarity_flush_caches() as $cache_table) {
     cache_clear_all('*', $cache_table, TRUE);
   }
+
+  $queue = drupal_queue_get('similarity_calculate');
+  // Queue up all objects for recalculation.
+  foreach ($similarity->findCandidates() as $candiate) {
+    $queue->createItem(array('machine_name' => $similarity->machine_name, 'id' => $candiate));
+  }
 }
 
 /**

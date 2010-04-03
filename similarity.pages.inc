@@ -328,6 +328,7 @@ function similarity_object_edit_submit_basics($form, &$form_state) {
  *   HTML string for the output.
  */
 function similarity_settings_page(Similarity $similarity, $js = FALSE, $action = 'edit', $section = 'basics', $plugin_id = '') {
+  // @TODO: handle $similarity->lock.
   drupal_add_css(drupal_get_path('module', 'similarity') . '/theme/similarity.css');
   //ctools_include('ajax');
   //ctools_add_js('ajax-responder');
