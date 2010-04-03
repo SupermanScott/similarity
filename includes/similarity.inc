@@ -329,6 +329,14 @@ class Similarity {
     return $data;
   }
 
+  public function exportObject() {
+    // @TODO: remove the defaulted options so it reduces the export.
+    if ($this->from_cache) {
+      $this->ctools_base_object->options = $this->options;
+    }
+    return $this->ctools_base_object;
+  }
+
   /**
    * Generic get function to return ctools object properties.
    */

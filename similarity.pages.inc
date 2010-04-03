@@ -6,6 +6,14 @@
  */
 
 /**
+ * Export a Similarity object.
+ */
+function similarity_export_page(Similarity $similarity) {
+  $code = similarity_export($similarity);
+  return drupal_get_form('ctools_export_form', $code, check_plain($similarity->description));
+}
+
+/**
  * Page callback for the overview page.
  */
 function similarity_objects_overview() {
