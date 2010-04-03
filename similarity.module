@@ -55,6 +55,16 @@ function similarity_views_api() {
 }
 
 /**
+ * Implementation of hook_flush_caches().
+ */
+function similarity_flush_caches() {
+  // @TODO: should each object have its own cache table.
+  return array(
+    'cache_similarity_tokens',
+  );
+}
+
+/**
  * Implementation of hook_similarity_objects_default().
  */
 function similarity_similarity_objects_default($export_defintion) {
@@ -143,7 +153,7 @@ function similarity_menu() {
       'access callback' => 'similarity_delete_access',
       'access arguments' => array(4),
     ),
-    'admin/build/similarity/edit/%similarity' => array(
+    'admin/build/similarity/edit/%similarity_cache' => array(
       'title callback' => 'similarity_admin_title',
       'title arguments' => array('edit', 4),
       'page callback' => 'similarity_settings_page',
@@ -152,7 +162,7 @@ function similarity_menu() {
       'access callback' => 'user_access',
       'access arguments' => array('administer similarity'),
     ),
-    'admin/build/similarity/edit/%similarity/%ctools_js' => array(
+    'admin/build/similarity/edit/%similarity_cache/%ctools_js' => array(
       'title callback' => 'similarity_admin_title',
       'title arguments' => array('edit', 4),
       'page callback' => 'similarity_settings_page',
@@ -363,6 +373,43 @@ function similarity_save(Similarity $similarity) {
   if (!db_affected_rows()) {
     drupal_write_record('similarity_objects', $similarity);
   }
+
+  // Clear its caches.
+  foreach (similarity_flush_caches() as $cache_table) {
+    cache_clear_all('*', $cache_table, TRUE);
+  }
+}
+
+/**
+ * Get the cached changes for a similarity.
+ */
+function similarity_cache_load($machine_name) {
+  ctools_include('object-cache');
+  ctools_include('similarity', 'similarity');
+  ctools_include('plugins');
+  $cache = ctools_object_cache_get('similarity_objects', $machine_name);
+  if (!$cache) {
+    $cache = similarity_load($machine_name);
+    $cache->locked = ctools_object_cache_test('similarity_objects', $machine_name);
+  }
+
+  return $cache;
+}
+
+/**
+ * Save a similarity to the object cache.
+ */
+function similarity_cache_save(Similarity $similarity) {
+  ctools_include('object-cache');
+  $cache = ctools_object_cache_set('similarity_objects', $similarity->machine_name, $similarity);
+}
+
+/**
+ * Remove a similarity from the object cache.
+ */
+function similarity_cache_remove(Similarity $similarity) {
+  ctools_include('object-cache');
+  ctools_object_cache_clear('similarity_objects', $similarity->machine_name);
 }
 
 /**

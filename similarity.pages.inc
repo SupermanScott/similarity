@@ -54,6 +54,36 @@ function similarity_objects_overview() {
 }
 
 /**
+ * Commit form.
+ *
+ */
+function similarity_commit_form($form_state, $similarity) {
+  return array(
+    '#similarity' => $similarity,
+    'buttons' => array(
+      'commit' => array(
+        '#type' => 'submit',
+        '#value' => t('Commit Changes'),
+      ),
+      'cancel' => array(
+        '#type' => 'submit',
+        '#value' => t('Cancel'),
+      ),
+    ),
+  );
+}
+
+/**
+ * Submit function to handle the similarity commit form.
+ */
+function similarity_commit_form_submit($form, &$form_state) {
+  if ($form_state['values']['op'] == t('Commit Changes')) {
+    similarity_save($form['#similarity']);
+  }
+  similarity_cache_remove($form['#similarity']);
+}
+
+/**
  * Delete confirmation form.
  */
 function similarity_object_delete($form_state, $similarity_object) {
@@ -122,7 +152,7 @@ function similarity_add_plugin_transformers_submit($form, &$form_state) {
   );
 
 
-  similarity_save($form['#similarity']);
+  similarity_cache_save($form['#similarity']);
   $form_state['redirect'] = 'admin/build/similarity/edit/' . $form['#similarity']->machine_name . '/nojs/edit/transformers/' .  $form_state['values']['transformers'];
 }
 
@@ -137,7 +167,7 @@ function similarity_add_plugin_conditions_submit($form, &$form_state) {
   );
 
 
-  similarity_save($form['#similarity']);
+  similarity_cache_save($form['#similarity']);
   $form_state['redirect'] = 'admin/build/similarity/edit/' . $form['#similarity']->machine_name . '/nojs/edit/conditions/' .  $form_state['values']['conditions'];
 }
 
@@ -152,7 +182,7 @@ function similarity_add_plugin_tokenizers_submit($form, &$form_state) {
   );
 
 
-  similarity_save($form['#similarity']);
+  similarity_cache_save($form['#similarity']);
   $form_state['redirect'] = 'admin/build/similarity/edit/' . $form['#similarity']->machine_name . '/nojs/edit/tokenizers/' .  $form_state['values']['tokenizers'];
 }
 
@@ -197,7 +227,7 @@ function similarity_add_object_form_submit($form, &$form_state) {
   $basic_obj->options['description'] = $form_state['values']['description'];
 
   $sim = similarity_create($basic_obj);
-  similarity_save($sim);
+  similarity_cache_save($sim);
 
   $form_state['redirect'] = 'admin/build/similarity/edit/' . $sim->machine_name;
 }
@@ -246,7 +276,7 @@ function similarity_object_edit_submit_conditions($form, &$form_state) {
       }
     }
   }
-  similarity_save($form['#similarity']);
+  similarity_cache_save($form['#similarity']);
 }
 
 /**
@@ -260,7 +290,7 @@ function similarity_object_edit_submit_transformers($form, &$form_state) {
       }
     }
   }
-  similarity_save($form['#similarity']);
+  similarity_cache_save($form['#similarity']);
 }
 
 /**
@@ -274,7 +304,7 @@ function similarity_object_edit_submit_tokenizers($form, &$form_state) {
       }
     }
   }
-  similarity_save($form['#similarity']);
+  similarity_cache_save($form['#similarity']);
 }
 
 /**
@@ -284,7 +314,7 @@ function similarity_object_edit_submit_basics($form, &$form_state) {
   if (isset($form_state['values']['options'])) {
     $form['#similarity']->options = array_merge($form['#similarity']->options, $form_state['values']['options']);
   }
-  similarity_save($form['#similarity']);
+  similarity_cache_save($form['#similarity']);
 }
 
 /**
@@ -482,7 +512,8 @@ function similarity_settings_page(Similarity $similarity, $js = FALSE, $action =
     drupal_render($transformers) .
     '</div>' .
     $main_section .
-    '</div>';
+    '</div>' .
+    drupal_get_form('similarity_commit_form', $similarity);
 }
 
 /**
@@ -577,7 +608,7 @@ function similarity_edit_main_section_remove($js, Similarity $similarity, $secti
         }
       }
     }
-    similarity_save($similarity);
+    similarity_cache_save($similarity);
     drupal_goto('admin/build/similarity/edit/' . $similarity->machine_name);
   }
 }
