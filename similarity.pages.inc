@@ -109,8 +109,7 @@ function similarity_object_delete($form_state, $similarity_object) {
  */
 function similarity_object_delete_submit($form, &$form_state) {
   $form_state['redirect'] = 'admin/build/similarity';
-  db_query("DELETE FROM {similarity_objects} WHERE machine_name = '%s'", $form['#similarity']->machine_name);
-  similarity_cache_remove($form['#similarity']);
+  similarity_delete($form['#similarity']);
 }
 
 /**

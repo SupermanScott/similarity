@@ -1076,6 +1076,18 @@ function similarity_save(Similarity $similarity) {
 }
 
 /**
+ * Delete a similarity from the database.
+ */
+function similarity_delete(Similarity $similarity) {
+  db_query("DELETE FROM {similarity_objects} WHERE machine_name = '%s'", $similarity->machine_name);
+  similarity_cache_remove($similarity);
+
+  // Handle queued up items.
+  $queue = drupal_queue_get("similarity_calculate_{$similarity->machine_name}");
+  $queue->deleteQueue();
+}
+
+/**
  * Get the cached changes for a similarity.
  */
 function similarity_cache_load($machine_name) {
