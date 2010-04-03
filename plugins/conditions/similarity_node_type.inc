@@ -14,6 +14,7 @@ $plugin = array(
   ),
   'form_callback' => 'similarity_condition_node_type_form',
   'base' => array('node'),
+	'help_topic' => 'conditions-node-type',
 );
 
 /**

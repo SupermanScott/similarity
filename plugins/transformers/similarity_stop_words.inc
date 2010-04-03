@@ -8,6 +8,7 @@ $plugin = array(
   'title' => t('Stop Words'),
   'callback' => 'similarity_transformer_stop_words',
   'form_callback' => 'similarity_transformer_stop_words_form',
+	'help_topic' => 'transformers-stop-words',
   'option_definition' => array(
     'stop_words' => array(
       '#default_value' => array(

@@ -33,13 +33,20 @@ function theme_similarity_edit_container($container) {
   $output = '<div ' . drupal_attributes($container['#attributes']) . '>';
   if ($container['#title']) {
     $output .= '<h4>' . check_plain($container['#title']) . '</h4>';
+    if (!empty($container['#help'])) {
+      $output .= $container['#help'];
+    }
   }
   if ($container['#links']) {
     $output .= theme('links', $container['#links'], array('class' => 'links similarity-container-links'));
   }
 
   foreach (element_children($container) as $child) {
-    $output .= '<div class="similarity-container-item-wrapper"><span class="similarity-container-item-title">' . $container[$child]['#title'] . '</span><span class="similarity-container-item-value">' . $container[$child]['#value'] . '</span></div>';
+    $headline = '<span class="similarity-container-item-title">' . check_plain($container[$child]['#title']) . '</span>';
+    if (!empty($container[$child]['#help'])) {
+      $headline .= $container[$child]['#help'];
+    }
+    $output .= '<div class="similarity-container-item-wrapper">' . $headline . '<span class="similarity-container-item-value">' . $container[$child]['#value'] . '</span></div>';
   }
 
   return $output . '</div>';

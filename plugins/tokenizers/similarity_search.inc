@@ -7,8 +7,8 @@
 $plugin = array(
   'title' => t('Search Index'),
   'callback' => 'similarity_tokenizer_search_index',
-  'option_definition' => array(
-  ),
+  'option_definition' => array(),
+	'help_topic' => 'tokenizer-search',
   'base' => array('node'),
 );
 

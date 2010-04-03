@@ -304,6 +304,7 @@ function similarity_settings_page(Similarity $similarity, $js = FALSE, $action =
   $config_info = array();
   $basics = array(
     '#title' => t('Basics'),
+    '#help' => theme('advanced_help_topic', 'similarity', 'about'),
     '#links' => array(
       'change' => array(
         'title' => t('Edit'),
@@ -331,6 +332,7 @@ function similarity_settings_page(Similarity $similarity, $js = FALSE, $action =
 
   $conditions = array(
     '#title' => t('Conditions'),
+    '#help' => theme('advanced_help_topic', 'similarity', 'conditions'),
     '#links' => array(
       'add' => array(
         'title' => t('Add'),
@@ -370,10 +372,15 @@ function similarity_settings_page(Similarity $similarity, $js = FALSE, $action =
       '#title' => $plugin['title'],
       '#value' => theme('links', $edit_remove, array('class' => 'links similarity-plugin-links')),
     );
+
+    if (!empty($plugin['help_topic'])) {
+      $conditions[$plugin_def['plugin_id']]['#help'] = theme('advanced_help_topic', $plugin['module'], $plugin['help_topic']);
+    }
   }
 
   $tokenizers = array(
     '#title' => t('Tokenizers'),
+    '#help' => theme('advanced_help_topic', 'similarity', 'tokenizers'),
     '#links' => array(
       'add' => array(
         'title' => t('Add'),
@@ -407,16 +414,18 @@ function similarity_settings_page(Similarity $similarity, $js = FALSE, $action =
         ),
       ),
     );
-
     $tokenizers[$plugin_def['plugin_id']] = array(
-      '#type' => 'item',
       '#title' => $plugin['title'],
       '#value' => theme('links', $edit_remove, array('class' => 'links similarity-plugin-links')),
     );
+    if (!empty($plugin['help_topic'])) {
+      $tokenizers[$plugin_def['plugin_id']]['#help'] = theme('advanced_help_topic', $plugin['module'], $plugin['help_topic']);
+    }
   }
 
   $transformers = array(
     '#title' => t('Transformers'),
+    '#help' => theme('advanced_help_topic', 'similarity', 'transformers'),
     '#links' => array(
       'add' => array(
         'title' => t('Add'),
@@ -456,6 +465,10 @@ function similarity_settings_page(Similarity $similarity, $js = FALSE, $action =
       '#title' => $plugin['title'],
       '#value' => theme('links', $edit_remove, array('class' => 'links similarity-plugin-links')),
     );
+
+    if (!empty($plugin['help_topic'])) {
+      $transformers[$plugin_def['plugin_id']]['#help'] = theme('advanced_help_topic', $plugin['module'], $plugin['help_topic']);
+    }
   }
 
   $main_section_function = 'similarity_edit_main_section_' . $action;

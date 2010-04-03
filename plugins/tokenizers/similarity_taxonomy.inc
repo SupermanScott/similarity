@@ -14,6 +14,7 @@ $plugin = array(
   ),
   'form_callback' => 'similarity_tokenizer_taxonomy_form',
   'base' => array('node'),
+	'help_topic' => 'tokenizer-taxonomy',
 );
 
 /**

@@ -1,0 +1,21 @@
+<!-- $Id: $ -->
+The Similarity Objects module is a tool for configuring similarity
+calculations against arbitrary Drupal entities. Its goal is to
+provide a central place for calculating similarities for other modules
+to use.
+
+<h3>Properties of a Similarity Object</h3>
+<dl>
+	<dt><a href="&topic:similarity/conditions&">Conditions</a></dt>
+	<dd>Conditions provide means to filter the resulting objects allowing
+		similarity calculations only to happen on objects that match the
+		conditions against all other objects that match the same
+		condition.
+	</dd>
+	<dt><a href="&topic:similarity/tokens&">Tokens</a></dt>
+	<dd>Tokens are the actual pieces of information used for the
+		similarity calculation. Common examples are the search index,
+		taxonomy terms and votes. These tokens can then be transformed into
+		other tokens.
+	</dd>
+</dl>
