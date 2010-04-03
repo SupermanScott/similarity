@@ -812,6 +812,14 @@ function similarity_menu() {
       'type' => MENU_LOCAL_TASK,
       'weight' => -1,
     ),
+    'admin/build/similarity/import' => array(
+      'title' => 'Import',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('similarity_import_form'),
+      'access arguments' => array('administer similarity'),
+      'type' => MENU_LOCAL_TASK,
+      'file' => 'similarity.pages.inc',
+    ),
     'admin/build/similarity/export/%similarity_cache' => array(
       'title callback' => 'similarity_admin_title',
       'title arguments' => array('export', 4),

@@ -623,3 +623,64 @@ function similarity_edit_main_section_remove($js, Similarity $similarity, $secti
     drupal_goto('admin/build/similarity/edit/' . $similarity->machine_name);
   }
 }
+
+/**
+ * Form for importing a Similarity
+ */
+function similarity_import_form($form_state) {
+  $form['name'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Similarity Name'),
+    '#description' => t('Enter the name of the new Similarity. This is optional and is not necessary if you do not wish to rename the object.'),
+  );
+
+  $form['object'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Paste variant code here'),
+    '#rows' => 30,
+    '#required' => TRUE,
+  );
+
+  $form['create'] = array(
+    '#type' => 'submit',
+    '#value' => t('Create'),
+  );
+
+  return $form;
+}
+
+/**
+ * Make sure that an import actually provides a handler.
+ */
+function similarity_import_form_validate($form, &$form_state) {
+  // First, run the PHP and turn the input code into an object.
+  ob_start();
+  eval($form_state['values']['object']);
+  ob_end_clean();
+
+  // The object should appear as $similarity_object. This was the "identifier" set in the export section of the schema.
+  if (empty($similarity_object)) {
+    $errors = ob_get_contents();
+    if (empty($errors)) {
+      $errors = t('No similarity_object found.');
+    }
+
+    form_error($form['object'], t('Unable to get a similarity_object from the import. Errors reported: @errors', array('@errors' => $errors)));
+  }
+
+  $form_state['similarity'] = similarity_create($similarity_object);
+}
+
+/**
+ * Save the imported object.
+ */
+function similarity_import_form_submit($form, &$form_state) {
+  $similarity = $form_state['similarity'];
+
+  if (!empty($form_state['values']['name'])) {
+    $similarity->machine_name = $form_state['values']['name'];
+  }
+  similarity_cache_save($similarity);
+  $form_state['redirect'] = 'admin/build/similarity/edit/' . $similarity->machine_name;
+}
+
