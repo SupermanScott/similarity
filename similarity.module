@@ -978,13 +978,25 @@ function similarity_node_update($node) {
   }
 }
 
+/**
+ * Implementation of Ctools Export list callback.
+ */
+function similarity_similarity_objects_list() {
+  $options = array();
+  foreach (similarity_all_objects() as $machine_name => $similarity) {
+    $options[$machine_name] = $similarity->title();
+  }
+
+  return $options;
+}
+
 // util functions
 /**
  * Export a Similarity configuration to code.
  */
-function similarity_export(Similarity $similarity, $indent = '') {
+function similarity_export($ctools_object, $indent = '') {
   ctools_include('export');
-  return ctools_export_object('similarity_objects', $similarity->exportObject(), $indent);
+  return ctools_export_object('similarity_objects', $ctools_object, $indent);
 }
 
 /**

@@ -22,6 +22,7 @@ function similarity_schema() {
         'minimum_version' => 1,
         'current_version' => 1,
       ),
+      'export callback' => 'similarity_export',
     ),
     'fields' => array(
       'machine_name' => array(

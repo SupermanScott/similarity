@@ -9,7 +9,7 @@
  * Export a Similarity object.
  */
 function similarity_export_page(Similarity $similarity) {
-  $code = similarity_export($similarity);
+  $code = similarity_export($similarity->exportObject());
   return drupal_get_form('ctools_export_form', $code, check_plain($similarity->description));
 }
 
