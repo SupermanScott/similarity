@@ -29,7 +29,8 @@ $plugin = array(
  */
 function similarity_tokenizer_taxonomy($nid, $options) {
   static $total_nodes = NULL, $idf = array();
-  if ($options['vid'] == 0) {
+  $options['vid'] = array_filter($options['vid']);
+  if (empty($options['vid'])) {
     $tids = db_query("SELECT tid FROM {term_node} WHERE nid = %d", $nid);
   }
   else {
