@@ -307,7 +307,7 @@ class Similarity {
       ),
     );
     $data[$table_name]['nid2'] = array(
-      'title' => t('@name Similary NID', array('@name' => $this->title)),
+      'title' => t('@name Similary NID', array('@name' => $this->title())),
       'argument' => array(
         'handler' => 'views_handler_argument_node_nid',
       ),
@@ -315,7 +315,7 @@ class Similarity {
     );
     
     $data[$table_name]['score'] = array(
-      'title' => t('@name Similarity score', array('@name' => $this->title)),
+      'title' => t('@name Similarity score', array('@name' => $this->title())),
       'field' => array(
         'handler' => 'views_handler_field_numeric', // TODO: write this handler
         'click sortable' => TRUE,
