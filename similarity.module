@@ -79,7 +79,7 @@ function similarity_ctools_plugin_directory($module, $plugin_type) {
  * Implementation of hook_menu().
  */
 function similarity_menu() {
-  return array(
+  $items = array(
     'admin/build/similarity' => array(
       'title' => 'Similarity Objects',
       'page callback' => 'similarity_objects_overview',
@@ -144,7 +144,18 @@ function similarity_menu() {
       'access callback' => 'user_access',
       'access arguments' => array('administer similarity'),
     ),
+    'admin/build/similarity/batch/%similarity' => array(
+      'title callback' => 'similarity_admin_title',
+      'title arguments' => array('batch import', 4),
+      'page callback' => 'similarity_batch_import',
+      'page arguments' => array(4),
+      'access callback' => 'similarity_admin_link',
+      'access arguments' => array(4, 'administer similarity'),
+      'file' => 'similarity.pages.inc',
+    ),
   );
+
+  return $items;
 }
 
 /**
@@ -163,6 +174,21 @@ function similarity_admin_title($op, $similarity_object) {
  */
 function similarity_delete_access($similarity_object) {
   return ($similarity_object->export_type & EXPORT_IN_DATABASE || $similarity_object->from_cache) && user_access('administer similarity');
+}
+
+/**
+ * Access callback for admin links not protected by FAPI.
+ *
+ * @param Similarity $similarity
+ *  The similarity for the link, used by drupal_valid_token.
+ * @param $access_string
+ *  The string to call user_access against.
+ */
+function similarity_admin_link(Similarity $similarity, $access_string) {
+  if (drupal_valid_token($_GET['token'], $similarity->machine_name)) {
+    return user_access($access_string);
+  }
+  return FALSE;
 }
 
 /**
@@ -360,6 +386,21 @@ function similarity_save(Similarity $similarity) {
     drupal_write_record('similarity_objects', $similarity);
   }
 
+  similarity_reset_similarity($similarity);
+
+  // Queue up all objects for recalculation.
+  foreach ($similarity->findCandidates() as $candiate) {
+    $queue->createItem(array('machine_name' => $similarity->machine_name, 'id' => $candiate));
+  }
+}
+
+/**
+ * Reset the data store for the similarity.
+ *
+ * @param Similarity $similarity
+ *   The similarity to reset.
+ */
+function similarity_reset_similarity(Similarity $similarity) {
   // Clear its caches.
   foreach (similarity_flush_caches() as $cache_table) {
     cache_clear_all('*', $cache_table, TRUE);
@@ -368,12 +409,8 @@ function similarity_save(Similarity $similarity) {
   // Handle queued up items.
   $queue = drupal_queue_get("similarity_calculate_{$similarity->machine_name}");
   $queue->deleteQueue();
-
-  // Queue up all objects for recalculation.
-  foreach ($similarity->findCandidates() as $candiate) {
-    $queue->createItem(array('machine_name' => $similarity->machine_name, 'id' => $candiate));
-  }
 }
+
 
 /**
  * Delete a similarity from the database.

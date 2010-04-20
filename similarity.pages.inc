@@ -35,6 +35,16 @@ function similarity_objects_overview() {
               'class' => 'similarity-edit similarity-admin-link',
             ),
           ),
+          'bulk_import' => array(
+            'href' => 'admin/build/similarity/batch/' . $name,
+            'title' => t('calculate'),
+            'attributes' => array(
+              'class' => 'similarity-bulk-import similarity-admin-link',
+            ),
+            'query' => array(
+              'token' => drupal_get_token($name),
+            ),
+          ),
         ),
         '#theme' => array('similarity_object_overview__' . $name, 'similarity_object_overview'),
       );
@@ -683,3 +693,23 @@ function similarity_import_form_submit($form, &$form_state) {
   $form_state['redirect'] = 'admin/build/similarity/edit/' . $similarity->machine_name;
 }
 
+/**
+ * Batch page callback to calculate the similarities for the supplied node.
+ *
+ * @param Similarity $similarity
+ *  The Similarity object to batch calculate.
+ */
+function similarity_batch_import(Similarity $similarity) {
+  similarity_reset_similarity($similarity);
+  $batch = array(
+    'title' => t('Calculating'),
+    'operations' => array(),
+  );
+
+  foreach ($similarity->findCandidates() as $id) {
+    $batch['operations'][] = array('similarity_calculate_work', array(array('id' => $id, 'machine_name' => $similarity->machine_name)));
+  }
+  
+  batch_set($batch);
+  batch_process('admin/build/similarity');
+}
