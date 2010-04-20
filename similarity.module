@@ -164,7 +164,7 @@ function similarity_menu() {
 function similarity_admin_title($op, $similarity_object) {
   $edit = '';
   if ($similarity_object->from_cache) {
-    $edit = '(' . t('Not Saved') . ')';
+    $edit = '(' . t('Not Committed') . ')';
   }
   return t(drupal_ucfirst($op) . ' @title !edit', array('@title' => $similarity_object->title(), '!edit' => $edit));
 }
