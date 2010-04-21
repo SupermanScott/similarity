@@ -124,7 +124,7 @@ class Similarity {
       $transformer = ctools_plugin_load_function('similarity', 'transformers', $transformer_definition['plugin_id'], 'callback');
       if ($transformer) {
         // Transformers turn the tokens from the tokenizers into something else.
-        $tokens = $transformer($tokens, $transformer_definition['options']);
+        $tokens = $transformer($object_id, $tokens, $transformer_definition['options']);
       }
     }
 
@@ -146,17 +146,12 @@ class Similarity {
     $algorithm = ctools_plugin_load_function('similarity', 'algorithms', $this->options['algorithms']['plugin_id'], 'callback');
 
     foreach ($object_set as $other_id) {
-      if ($other_id >= $object_id) {
-        // Only calculate a similarity between the two pairs once. To ensure
-        // that happens, only calculate similarities between $object_id and all
-        // other ids less then it.
-        break;
-      }
-
-      $other_tokens = $this->tokenize($other_id);
-      $similarity = $algorithm($base_tokens, $other_tokens, $this->options['algorithms']['options']);
-      if ($similarity >= $this->options['min_sim']) {
-        $this->saveSimilarity($object_id, $other_id, $similarity);
+      if ($other_id != $object_id) {
+        $other_tokens = $this->tokenize($other_id);
+        $similarity = $algorithm($base_tokens, $other_tokens, $this->options['algorithms']['options']);
+        if ($similarity >= $this->options['min_sim']) {
+          $this->saveSimilarity($object_id, $other_id, $similarity);
+        }
       }
     }
   }

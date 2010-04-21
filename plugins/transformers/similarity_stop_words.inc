@@ -680,6 +680,8 @@ $plugin = array(
 /**
  * Remove the our stop words from the tokens.
  *
+ * @param int $id
+ *  The object id being tokenized.
  * @param $tokens
  *  The tokens that have been processed.
  * @param $options
@@ -687,7 +689,7 @@ $plugin = array(
  * @return array
  *  The new tokens.
  */
-function similarity_transformer_stop_words($tokens, $options) {
+function similarity_transformer_stop_words($id, $tokens, $options) {
   foreach ($options['stop_words'] as $stop_word) {
     if (isset($tokens[$stop_word])) {
       unset($tokens[$stop_word]);

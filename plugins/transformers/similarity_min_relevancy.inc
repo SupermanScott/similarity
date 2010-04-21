@@ -34,6 +34,8 @@ function similarity_transformer_min_relevancy_form($form_state, $options) {
 /**
  * Remove tokens that do not meet our minimum relevancy requirement.
  *
+ * @param int $id
+ *   The object id being tokenized.
  * @param $tokens
  *   The tokens that were extracted from the database.
  * @param $options
@@ -42,7 +44,7 @@ function similarity_transformer_min_relevancy_form($form_state, $options) {
  * @return array
  *   The new tokens.
  */
-function similarity_transformer_min_relevancy($tokens, $options) {
+function similarity_transformer_min_relevancy($id, $tokens, $options) {
   $tokens = array_filter($tokens, Functor::create_functor('similarity_transformer_process_token', $options['min_relevancy']));
   return $tokens;
 }
