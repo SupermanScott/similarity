@@ -116,7 +116,7 @@ class Similarity {
       if (!empty($tokenizer_function)) {
         // Tokens can be overridden in the case that both tokenizers return the
         // same words, the last one will win out.
-        $tokens = array_merge($tokens, $tokenizer_function($object_id, $tokenizer_definition['options'], $this->options['base']));
+        $tokens += $tokenizer_function($object_id, $tokenizer_definition['options'], $this->options['base']);
       }
     }
 
