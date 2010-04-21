@@ -280,11 +280,11 @@ function similarity_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
  */
 function similarity_node_insert($node) {
   foreach (similarity_all_objects() as $sim) {
-    $queue = drupal_queue_get("similarity_calculate_{$sim->machine_name}");
     $sim->resetCandidates();
     $canidates = $sim->findCandidates();
+
     if (in_array($node->nid, $canidates)) {
-      $queue->createItem(array('machine_name' => $sim->machine_name, 'id' => $node->nid));
+      similarity_reindex_ids($sim, $node->nid);
     }
   }
 }
@@ -294,22 +294,39 @@ function similarity_node_insert($node) {
  */
 function similarity_node_update($node) {
   foreach (similarity_all_objects() as $sim) {
-    $queue = drupal_queue_get("similarity_calculate_{$sim->machine_name}");
     cache_clear_all($sim->machine_name . ':' . $node->nid, 'cache_similarity_tokens');
 
-    // Find all the nids that are affected by this update and queue them up.
-    $added_nids = FALSE;
-    foreach ($sim->updateIndex($node->nid) as $nid) {
-      $added_nids = TRUE;
-      $queue->createItem(array('machine_name' => $sim->machine_name, 'id' => $nid));
-    }
+    $added_nids = similarity_reindex_ids($sim, $node->nid);
 
-    if ($added_nids) {
+    if (!empty($added_nids)) {
       // This means that some nids have to be reindexed. Therefore it follows,
       // this node needs to be reindexed.
+      $queue = drupal_queue_get("similarity_calculate_{$sim->machine_name}");
       $queue->createItem(array('machine_name' => $sim->machine_name, 'id' => $node->nid));
     }
   }
+}
+
+/**
+ * Queue up the set of ids for a Similarity that need to be reindexed.
+ *
+ * @param Similarity $similarity
+ *   The Similarity object.
+ * @param integer $id
+ *   The id of the object that was added/changed.
+ *
+ * @return array
+ *   Set of ids that need to be reindexed.
+ */
+function similarity_reindex_ids(Similarity $similarity, $id) {
+  // Find all the nids that are affected by this update and queue them up.
+  $ids = $similarity->updateIndex($id);
+  $queue = drupal_queue_get("similarity_calculate_{$similarity->machine_name}");
+  foreach ($ids as $reindex_id) {
+    $queue->createItem(array('machine_name' => $similarity->machine_name, 'id' => $reindex_id));
+  }
+
+  return count($ids);
 }
 
 /**
