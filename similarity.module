@@ -287,8 +287,13 @@ function similarity_node_insert($node) {
  */
 function similarity_node_update($node) {
   foreach (similarity_all_objects() as $sim) {
-    // @TODO: how do handle the node update.
+    $queue = drupal_queue_get("similarity_calculate_{$sim->machine_name}");
     cache_clear_all($sim->machine_name . ':' . $node->nid, 'cache_similarity_tokens');
+
+    // Find all the nids that are affected by this update and queue them up.
+    foreach ($sim->updateIndex($node->nid) as $nid) {
+      $queue->createItem(array('machine_name' => $sim->machine_name, 'id' => $nid));
+    }
   }
 }
 
@@ -387,7 +392,8 @@ function similarity_save(Similarity $similarity) {
   }
 
   similarity_reset_similarity($similarity);
-
+  
+  $queue = drupal_queue_get("similarity_calculate_{$similarity->machine_name}");
   // Queue up all objects for recalculation.
   foreach ($similarity->findCandidates() as $candiate) {
     $queue->createItem(array('machine_name' => $similarity->machine_name, 'id' => $candiate));

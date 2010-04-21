@@ -243,6 +243,25 @@ class Similarity {
   }
 
   /**
+   * Returns all the ids that need to be reindexed.
+   *
+   * @param $id
+   *  The id that has just been changed.
+   */
+  public function updateIndex($id) {
+    $ids = array();
+    foreach ($this->options['tokenizers'] as $tokenizer_definition) {
+      $reindex_function = ctools_plugin_load_function('similarity', 'tokenizers', $tokenizer_definition['plugin_id'], 'reindex_candidates_callback');
+
+      if (!empty($reindex_function)) {
+        $ids = array_merge($ids, $reindex_function($id, $tokenizer_definition['options']));
+      }
+    }
+
+    return $ids;
+  }
+
+  /**
    * Return the title.
    */
   public function title() {

@@ -7,6 +7,7 @@
 $plugin = array(
   'title' => t('Taxonomy'),
   'callback' => 'similarity_tokenizer_taxonomy',
+  'reindex_candidates_callback' => 'similarity_tokenizer_taxonomy_reindex',
   'option_definition' => array(
     'vid' => array(
       '#default_value' => 0,
@@ -81,4 +82,34 @@ function similarity_tokenizer_taxonomy_form($form_state, $options) {
     ),
   );
   
+}
+
+/**
+ * Reindex callback. Returns all the id's that should be reindexed.
+ *
+ * @param $id
+ *  The id that recently changed.
+ * @param $options
+ *  The options for this plugin.
+ *
+ * @return array
+ *  An array of ids.
+ */
+function similarity_tokenizer_taxonomy_reindex($id, $options) {
+  $id_tids = db_query("SELECT tid FROM {term_node} WHERE nid = %d", $id);
+  $tids = array();
+  while ($tid_object = db_fetch_object($id_tids)) {
+    $tids[] = $tid_object->tid;
+  }
+
+  $nids = array();
+  if (!empty($tids)) {
+    $sql = "SELECT DISTINCT(nid) FROM {term_node} WHERE tid IN (" . db_placeholders($tids, 'int') . ")";
+    $nid_result = db_query($sql, $tids);
+    while ($nid_object = db_fetch_object($nid_result)) {
+      $nids[] = $nid_object->nid;
+    }
+  }
+
+  return $nids;
 }
