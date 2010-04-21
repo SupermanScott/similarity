@@ -366,10 +366,3 @@ class Similarity {
     return NULL;
   }
 }
-
-/**
- * Element validation for the min sim form item.
- */
-function similarity_validate_min_sim($element, &$form_state) {
-  form_set_value($element, $element['#value'] / 100, $form_state);
-}
