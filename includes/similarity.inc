@@ -258,7 +258,9 @@ class Similarity {
       }
     }
 
-    return $ids;
+    // Because the tokenizers have no idea about the conditions, leverage the
+    // conditions here to find the union of the two sets.
+    return array_intersect($ids, $this->findCandidates());
   }
 
   /**
