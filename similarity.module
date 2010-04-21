@@ -416,7 +416,7 @@ function similarity_save(Similarity $similarity) {
 function similarity_reset_similarity(Similarity $similarity) {
   // Clear its caches.
   foreach (similarity_flush_caches() as $cache_table) {
-    cache_clear_all('*', $cache_table, TRUE);
+    cache_clear_all($similarity->machine_name, $cache_table, TRUE);
   }
 
   // Handle queued up items.
@@ -432,9 +432,7 @@ function similarity_delete(Similarity $similarity) {
   db_query("DELETE FROM {similarity_objects} WHERE machine_name = '%s'", $similarity->machine_name);
   similarity_cache_remove($similarity);
 
-  // Handle queued up items.
-  $queue = drupal_queue_get("similarity_calculate_{$similarity->machine_name}");
-  $queue->deleteQueue();
+  similarity_reset_similarity($similarity);
 }
 
 /**
