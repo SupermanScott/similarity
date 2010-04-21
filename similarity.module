@@ -298,8 +298,16 @@ function similarity_node_update($node) {
     cache_clear_all($sim->machine_name . ':' . $node->nid, 'cache_similarity_tokens');
 
     // Find all the nids that are affected by this update and queue them up.
+    $added_nids = FALSE;
     foreach ($sim->updateIndex($node->nid) as $nid) {
+      $added_nids = TRUE;
       $queue->createItem(array('machine_name' => $sim->machine_name, 'id' => $nid));
+    }
+
+    if ($added_nids) {
+      // This means that some nids have to be reindexed. Therefore it follows,
+      // this node needs to be reindexed.
+      $queue->createItem(array('machine_name' => $sim->machine_name, 'id' => $node->nid));
     }
   }
 }
